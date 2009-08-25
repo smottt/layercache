@@ -1,0 +1,125 @@
+<?php
+	/**
+	Copyright 2009 Gasper Kozak
+	
+    This file is part of LayerCache.
+		
+    LayerCache is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LayerCache is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LayerCache.  If not, see <http://www.gnu.org/licenses/>.
+
+    @package Tests
+	**/
+	
+	require_once 'PHPUnit/Framework.php';
+	include_once dirname(__FILE__) . '/../lib/LayerCache.php';
+	include_once dirname(__FILE__) . '/mocks.php';
+	
+	class CacheStackTest extends PHPUnit_Framework_TestCase
+	{
+		function testWithoutCache()
+		{
+			$reader = $this->getMock('FakeReader', array('get'));
+			$reader->expects($this->once())->method('get')->with(5)->will($this->returnValue('data'));
+			
+			$stack = new LayerCache_Stack($reader, array());
+			$this->assertSame('data', $stack->get(5));
+		}
+		
+		function testWithSingleEmptyCache()
+		{
+			$reader = $this->getMock('FakeReader', array('get', 'normalizeKey'));
+			$reader->expects($this->once())->method('get')->with(5)->will($this->returnValue('data'));
+			$reader->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('read', 'write'));
+			$cache->expects($this->once())->method('read')->with('k:5')->will($this->returnValue(null));
+			$cache->expects($this->once())->method('write')->with('k:5', array('data' => 'data', 'expires' => time() + 7), 7);
+			
+			$stack = new LayerCache_Stack($reader, array(array('cache' => $cache, 'ttl' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1)));
+			$stack->get(5);
+		}
+		
+		function testWithSingleFullCache()
+		{
+			$reader = $this->getMock('FakeReader', array('get', 'normalizeKey'));
+			$reader->expects($this->never())->method('get');
+			$reader->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('read'));
+			$cache->expects($this->once())->method('read')->with('k:5')->will($this->returnValue(array('expires' => time() + 15, 'data' => 'DATA')));
+			
+			$stack = new LayerCache_Stack($reader, array(array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 10, 'prefetchProbability' => 1)));
+			$stack->get(5);
+		}
+		
+		function testWithSinglePrefetchCache()
+		{
+			$reader = $this->getMock('FakeReader', array('get', 'normalizeKey'));
+			$reader->expects($this->once())->method('get')->with(5)->will($this->returnValue('NEW DATA'));
+			$reader->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('read', 'write'));
+			$cache->expects($this->once())->method('read')->with('k:5')->will($this->returnValue(array('expires' => time() + 10, 'data' => 'OLD DATA')));
+			$cache->expects($this->once())->method('write')->with('k:5', array('expires' => time() + 60, 'data' => 'NEW DATA'), 60);
+			
+			$stack = new LayerCache_Stack($reader, array(array('cache' => $cache, 'ttl' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1)));
+			$this->assertSame('NEW DATA', $stack->get(5));
+		}
+		
+		function testOneCacheTimeouts()
+		{
+			$reader = $this->getMock('FakeReader', array('get', 'normalizeKey'));
+			$reader->expects($this->never())->method('get');
+			$reader->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache1 = $this->getMock('FakeCache', array('read', 'write'));
+			$cache1->expects($this->once())->method('read')->with('k:5')->will($this->returnValue(array('expires' => time() + 20, 'data' => 'DATA 1')));
+			$cache1->expects($this->never())->method('write');
+			
+			$cache2 = $this->getMock('FakeCache', array('read', 'write'));
+			$cache2->expects($this->once())->method('read')->with('k:5')->will($this->returnValue(array('expires' => time() + 10, 'data' => 'DATA 2')));
+			$cache2->expects($this->once())->method('write')->with('k:5', array('expires' => time() + 30, 'data' => 'DATA 1'), 30);
+			
+			$stack = new LayerCache_Stack($reader, 
+				array(
+					array('cache' => $cache1, 'ttl' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1),
+					array('cache' => $cache2, 'ttl' => 30, 'prefetchTime' => 15, 'prefetchProbability' => 1)
+					));
+			
+			$this->assertSame('DATA 1', $stack->get(5));
+		}
+		
+		function testTwoCachesTimeout()
+		{
+			$reader = $this->getMock('FakeReader', array('get', 'normalizeKey'));
+			$reader->expects($this->once())->method('get')->with(5)->will($this->returnValue('NEW DATA'));
+			$reader->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache1 = $this->getMock('FakeCache', array('read', 'write'));
+			$cache1->expects($this->once())->method('read')->with('k:5')->will($this->returnValue(array('expires' => time() + 5, 'data' => 'DATA 1')));
+			$cache1->expects($this->once())->method('write')->with('k:5', array('expires' => time() + 60, 'data' => 'NEW DATA'), 60);
+			
+			$cache2 = $this->getMock('FakeCache');
+			$cache2->expects($this->once())->method('read')->with('k:5')->will($this->returnValue(array('expires' => time() + 10, 'data' => 'DATA 2')));
+			$cache2->expects($this->once())->method('write')->with('k:5', array('expires' => time() + 30, 'data' => 'NEW DATA'), 30);
+			
+			$stack = new LayerCache_Stack($reader, 
+				array(
+					array('cache' => $cache1, 'ttl' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1),
+					array('cache' => $cache2, 'ttl' => 30, 'prefetchTime' => 15, 'prefetchProbability' => 1)
+				));
+			
+			$this->assertSame('NEW DATA', $stack->get(5));
+		}
+	}
+	
