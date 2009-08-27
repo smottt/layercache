@@ -46,15 +46,5 @@
 		{
 			$this->memcache->set($key, serialize($data), $this->flags, $this->ttl);
 		}
-		
-		function acquireWriteLock($key)
-		{
-			return $this->memcache->add($key . '.lock', 1, 0, 3);
-		}
-		
-		function releaseWriteLock($key)
-		{
-			$this->memcache->delete($key . '.lock');
-		}
 	}
 	
