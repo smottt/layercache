@@ -35,6 +35,27 @@
 			$this->assertSame('data', $stack->get(5));
 		}
 		
+		function testSet()
+		{
+			$reader = $this->getMock('FakeReader', array('get', 'normalizeKey'));
+			$reader->expects($this->never())->method('get');
+			$reader->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache1 = $this->getMock('FakeCache', array('read', 'write'));
+			$cache1->expects($this->never())->method('read');
+			$cache1->expects($this->once())->method('write')->with('k:5', array('data' => 'DATA', 'expires' => time() + 7), 7);
+			
+			$cache2 = $this->getMock('FakeCache', array('read', 'write'));
+			$cache2->expects($this->never())->method('read');
+			$cache2->expects($this->once())->method('write')->with('k:5', array('data' => 'DATA', 'expires' => time() + 15), 15);
+			
+			$stack = new LayerCache_Stack($reader, array(
+				array('cache' => $cache1, 'ttl' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1),
+				array('cache' => $cache2, 'ttl' => 15, 'prefetchTime' => 5, 'prefetchProbability' => 0.5)
+				));
+			$stack->set(5, 'DATA');
+		}
+		
 		function testWithSingleEmptyCache()
 		{
 			$reader = $this->getMock('FakeReader', array('get', 'normalizeKey'));

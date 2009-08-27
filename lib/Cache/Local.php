@@ -20,19 +20,61 @@
     @package LayerCache
 	**/
 	
+	/**
+	 * 
+	 * 
+	 * A php array LRU cache
+	 *
+	 */
 	class LayerCache_Cache_Local
 	{
 		protected $items = array();
+		protected $maxItems = 0;
+		protected $maxSize = 0;
+		protected $size = 0;
+		protected $count = 0;
+		
+		function __construct($maxSize = 0, $maxItems = 0)
+		{
+			$this->maxSize = $maxSize;
+			$this->maxItems = $maxItems;
+		}
 		
 		function read($key)
 		{
 			if (isset($this->items[$key]))
-				return $this->items[$key];
+			{
+				$item = $this->items[$key];
+				unset($this->items[$key]);
+				$this->items[$key] = $item;
+				return $item['data'];
+			}
 		}
 		
 		function write($key, $data)
 		{
-			$this->items[$key] = $data;
+			if (isset($this->items[$key]))
+			{
+				$this->size = $this->size - $this->items[$key]['size'];
+				$this->count--;
+				unset($this->items[$key]);
+			}
+			
+			$this->count++;
+			$size = strlen($data);
+			$this->size += $size;
+			$this->items[$key] = array('size' => $size, 'data' => $data);
+			
+			while (($this->maxItems > 0 && $this->count > $this->maxItems) || ($this->maxSize > 0 && $this->size > $this->maxSize))
+				$this->evict();
+		}
+		
+		protected function evict()
+		{
+			$k = key($this->items);
+			$this->count--;
+			$this->size = $this->size - $this->items[$k]['size'];
+			unset($this->items[$k]);
 		}
 	}
-	
+		

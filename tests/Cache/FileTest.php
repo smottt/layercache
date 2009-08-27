@@ -51,8 +51,9 @@
 			$this->assertSame(null, $this->cache->read('test'));
 			$o = new StdClass;
 			$o->z = 34;
-			$this->cache->write('test', array('x', $o, array('a' => 12)), 10);
-			$this->assertEquals(array('x', $o, array('a' => 12)), $this->cache->read('test'));
+			$data = array('x', $o, array('a' => 12));
+			$this->cache->write('test', $data, 10);
+			$this->assertEquals($data, $this->cache->read('test'));
 		}
 		
 		function testTTL()

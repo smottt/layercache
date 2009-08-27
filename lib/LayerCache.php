@@ -56,7 +56,6 @@
 	require_once LayerCache::path() . '/StackBuilder.php';
 	
 	require_once LayerCache::path() . '/Cache/Local.php';
-	require_once LayerCache::path() . '/Cache/LocalLRU.php';
 	require_once LayerCache::path() . '/Cache/APC.php';
 	require_once LayerCache::path() . '/Cache/File.php';
 	require_once LayerCache::path() . '/Cache/Memcache.php';
