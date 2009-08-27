@@ -23,13 +23,11 @@
 	class LayerCache_Cache_Memcache
 	{
 		protected $memcache;
-		protected $ttl;
 		protected $flags;
 		
-		function __construct($memcache, $ttl = 0, $flags = 0)
+		function __construct($memcache, $flags = 0)
 		{
 			$this->memcache = $memcache;
-			$this->ttl = $ttl;
 			$this->flags = $flags;
 		}
 		
@@ -42,9 +40,9 @@
 				return unserialize($v);
 		}
 		
-		function write($key, $data)
+		function write($key, $data, $ttl)
 		{
-			$this->memcache->set($key, serialize($data), $this->flags, $this->ttl);
+			$this->memcache->set($key, serialize($data), $this->flags, $ttl);
 		}
 	}
 	

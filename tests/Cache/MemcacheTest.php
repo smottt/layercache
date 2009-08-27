@@ -47,9 +47,9 @@
 			$mc->expects($this->at(1))->method('set')->with('test', serialize('DATA'), 0, 10);
 			$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue(serialize('DATA')));
 			
-			$cache = new LayerCache_Cache_Memcache($mc, 10);
+			$cache = new LayerCache_Cache_Memcache($mc);
 			$this->assertSame(null, $cache->read('test'));
-			$cache->write('test', 'DATA');
+			$cache->write('test', 'DATA', 10);
 			$this->assertSame('DATA', $cache->read('test'));
 		}
 		
@@ -62,10 +62,10 @@
 			$data = array('x', $o, array('a' => 12));
 			
 			$mc->expects($this->at(0))->method('get')->with('test')->will($this->returnValue(false));
-			$mc->expects($this->at(1))->method('set')->with('test', serialize($data), 0, 10);
+			$mc->expects($this->at(1))->method('set')->with('test', serialize($data), 7, 10);
 			$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue(serialize($data)));
 			
-			$cache = new LayerCache_Cache_Memcache($mc, 10);
+			$cache = new LayerCache_Cache_Memcache($mc, 7);
 			$this->assertSame(null, $cache->read('test'));
 			$cache->write('test', $data, 10);
 			$this->assertEquals($data, $cache->read('test'));
