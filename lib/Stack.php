@@ -84,10 +84,10 @@
 		{
 			$now = time();
 			$nk = $this->reader->normalizeKey($key);
-			foreach ($this->proxies as $proxy)
+			foreach ($this->caches as $cache)
 			{
-				$entry = array('data' => $data, 'expires' => $now + $proxy->ttl);
-				$proxy->cache->write($nk, $entry);
+				$entry = array('data' => $data, 'expires' => $now + $cache['ttl']);
+				$cache['cache']->write($nk, $entry, $cache['ttl']);
 			}
 		}
 	}

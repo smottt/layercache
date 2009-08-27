@@ -41,5 +41,16 @@
 			$cache->write('test', 'DATA', 1);
 			$this->assertSame('DATA', $cache->read('test'));
 		}
+		
+                function testWriteAndReadComplexStructure()
+                {
+			$cache = new LayerCache_Cache_APC();
+                        $this->assertSame(null, $cache->read('test'));
+                        $o = new StdClass;
+                        $o->z = 34;
+                        $cache->write('test', array('x', $o, array('a' => 12)), 10);
+                        $this->assertEquals(array('x', $o, array('a' => 12)), $cache->read('test'));
+                }
+
 	}
 	
