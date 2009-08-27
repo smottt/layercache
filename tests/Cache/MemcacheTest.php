@@ -53,16 +53,5 @@
 			$this->assertSame('DATA', $cache->read('test'));
 		}
 		
-		function testWriteLock()
-		{
-			$mc = $this->getMock('Memcache', array('get', 'add', 'delete'));
-			$mc->expects($this->once())->method('add')->with('test.lock')->will($this->returnValue(true));
-			$mc->expects($this->once())->method('delete')->with('test.lock')->will($this->returnValue(true));
-			
-			$cache = new LayerCache_Cache_Memcache($mc);
-			
-			$this->assertTrue($cache->acquireWriteLock('test'));
-			$cache->releaseWriteLock('test');
-		}
 	}
 	
