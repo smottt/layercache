@@ -28,19 +28,19 @@
 	{
 		function testCreateWithoutCache()
 		{
-			$reader = new FakeReader;
-			$stack = $this->getMock('LayerCache_Stack', array(), array($reader, array()));
+			$source = new FakeSource;
+			$stack = $this->getMock('LayerCache_Stack', array(), array(array($source, 'get'), array($source, 'normalizeKey'), array()));
 			
 			$map = $this->getMock('LayerCache_StackMap');
 			$map->expects($this->once())->
 				method('set')->
 				with($this->equalTo('fake', $stack));
 			
-			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, $reader));
+			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
 			
 			$pb->expects($this->once())->
 				method('stackFactory')->
-				with($reader, array())->
+				with(array($source, 'get'), array($source, 'normalizeKey'), array())->
 				will($this->returnValue($stack));
 			
 			$p = $pb->toStack('fake');
@@ -49,8 +49,8 @@
 		
 		function testAppendCache()
 		{
-			$reader = new FakeReader;
-			$stack = $this->getMock('LayerCache_Stack', array(), array($reader, array()));
+			$source = new FakeSource;
+			$stack = $this->getMock('LayerCache_Stack', array(), array(array($source, 'get'), array($source, 'normalizeKey'), array()));
 			$cache = new FakeCache;
 			
 			$map = $this->getMock('LayerCache_StackMap');
@@ -58,11 +58,11 @@
 				method('set')->
 				with($this->equalTo('fake', $stack));
 			
-			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, $reader));
+			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
 			
 			$pb->expects($this->once())->
 				method('stackFactory')->
-				with($reader, array(array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1)))->
+				with(array($source, 'get'), array($source, 'normalizeKey'), array(array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1)))->
 				will($this->returnValue($stack));
 			
 			$p = $pb->addCache($cache)->toStack('fake');
@@ -71,8 +71,8 @@
 		
 		function testAppendCacheWithPrefetch()
 		{
-			$reader = new FakeReader;
-			$stack = $this->getMock('LayerCache_Stack', array(), array($reader, array()));
+			$source = new FakeSource;
+			$stack = $this->getMock('LayerCache_Stack', array(), array(array($source, 'get'), array($source, 'normalizeKey'), array()));
 			$cache = new FakeCache;
 			
 			$map = $this->getMock('LayerCache_StackMap');
@@ -80,11 +80,11 @@
 				method('set')->
 				with($this->equalTo('fake', $stack));
 			
-			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, $reader));
+			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
 			
 			$pb->expects($this->once())->
 				method('stackFactory')->
-				with($reader, array(array('cache' => $cache, 'ttl' => 120, 'prefetchTime' => 20, 'prefetchProbability' => 0.1)))->
+				with(array($source, 'get'), array($source, 'normalizeKey'), array(array('cache' => $cache, 'ttl' => 120, 'prefetchTime' => 20, 'prefetchProbability' => 0.1)))->
 				will($this->returnValue($stack));
 			
 			$p = $pb->addCache($cache)->withTTL(120)->withPrefetch(20, 0.1)->toStack('fake');
@@ -93,8 +93,8 @@
 		
 		function testAppendTwoCaches()
 		{
-			$reader = new FakeReader;
-			$stack = $this->getMock('LayerCache_Stack', array(), array($reader, array()));
+			$source = new FakeSource;
+			$stack = $this->getMock('LayerCache_Stack', array(), array(array($source, 'get'), array($source, 'normalizeKey'), array()));
 			$cache1 = new FakeCache;
 			$cache2 = new FakeCache;
 			
@@ -103,11 +103,11 @@
 				method('set')->
 				with($this->equalTo('fake', $stack));
 			
-			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, $reader));
+			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
 			
 			$pb->expects($this->once())->
 				method('stackFactory')->
-				with($reader, 
+				with(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
 					array(
 						'cache' => $cache1, 

@@ -20,8 +20,15 @@
     @package Tests
 	**/
 	
-	class FakeReader
+	class FakeSource
 	{
+		function get($key)
+		{
+		}
+		
+		function normalizeKey($key)
+		{
+		}
 	}
 	
 	class FakeCache
@@ -31,14 +38,6 @@
 		}
 		
 		function write($key, $data, $ttl)
-		{
-		}
-		
-		function acquireWriteLock($key)
-		{
-		}
-		
-		function releaseWriteLock($key)
 		{
 		}
 	}

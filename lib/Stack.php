@@ -22,13 +22,15 @@
 	
 	class LayerCache_Stack
 	{
-		protected $reader;
+		protected $dataCallback;
+		protected $keyCallback;
 		protected $caches = array();
 		protected $probabilityFactor = 1000000;
 		
-		function __construct($reader, array $caches)
+		function __construct($dataCallback, $keyCallback, array $caches = array())
 		{
-			$this->reader = $reader;
+			$this->dataCallback = $dataCallback;
+			$this->keyCallback = $keyCallback;
 			
 			$c = count($caches);
 			for ($i = $c - 1; $i >= 0; $i--)
@@ -47,7 +49,7 @@
 			if ($c > 0)
 			{
 				$now = time();
-				$nk = $this->reader->normalizeKey($key);
+				$nk = call_user_func($this->keyCallback, $key);
 				$r = mt_rand(1, $this->probabilityFactor);
 				
 				foreach ($this->caches as $i => $cache)
@@ -68,7 +70,7 @@
 			}
 			
 			if (!$data)
-				$data = $this->reader->get($key);
+				$data = call_user_func($this->dataCallback, $key);
 			
 			foreach ($emptyList as $i)
 			{
@@ -83,7 +85,7 @@
 		function set($key, $data)
 		{
 			$now = time();
-			$nk = $this->reader->normalizeKey($key);
+			$nk = call_user_func($this->keyCallback, $key);
 			foreach ($this->caches as $cache)
 			{
 				$entry = array('data' => $data, 'expires' => $now + $cache['ttl']);

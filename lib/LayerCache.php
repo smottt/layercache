@@ -37,12 +37,22 @@
 			return '##VERSION##';
 		}
 		
-		static function forSource($reader)
+		static function forSource($dataSource, $keySource = null)
 		{
 			if (self::$map === null)
 				self::$map = new LayerCache_StackMap();
 			
-			return new LayerCache_StackBuilder(self::$map, $reader);
+			if (is_object($dataSource))
+				$read_func = array($dataSource, 'get');
+			else
+				$read_func = $dataSource;
+			
+			if (is_object($keySource))
+				$key_func = array($keySource, 'normalizeKey');
+			else
+				$key_func = $keySource;
+			
+			return new LayerCache_StackBuilder(self::$map, $read_func, $key_func);
 		}
 		
 		static function stack($name)

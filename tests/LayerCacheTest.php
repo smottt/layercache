@@ -25,7 +25,7 @@
 	
 	class LayerCacheTest extends PHPUnit_Framework_TestCase
 	{
-		function testForReaderReturnsBuilder()
+		function testForSourceReturnsStackBuilder()
 		{
 			$source = new StdClass;
 			$b = LayerCache::forSource($source);
@@ -37,6 +37,16 @@
 			$source = new StdClass;
 			$stack = LayerCache::forSource($source)->toStack('X');
 			$this->assertSame($stack, LayerCache::stack('X'));
+		}
+		
+		function testForSourceCallback()
+		{
+			$source = $this->getMock('FakeSource', array('getById', 'mapKey'));
+			$source->expects($this->once())->method('getById')->with(123)->will($this->returnValue('DATA'));
+			$source->expects($this->never())->method('mapKey');
+			
+			$stack = LayerCache::forSource(array($source, 'getById'), array($source, 'mapKey'))->toStack('X');
+			$this->assertSame('DATA', $stack->get(123));
 		}
 	}
 	

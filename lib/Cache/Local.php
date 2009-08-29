@@ -51,7 +51,7 @@
 			}
 		}
 		
-		function write($key, $data, $ttl)
+		function write($key, $data)
 		{
 			if (isset($this->items[$key]))
 			{

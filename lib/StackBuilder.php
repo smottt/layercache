@@ -23,13 +23,15 @@
 	class LayerCache_StackBuilder
 	{
 		protected $map;
-		protected $reader;
+		protected $dataSource;
+		protected $keySource;
 		protected $caches = array();
 		
-		function __construct(LayerCache_StackMap $map, $reader)
+		function __construct(LayerCache_StackMap $map, $dataSource, $keySource)
 		{
 			$this->map = $map;
-			$this->reader = $reader;
+			$this->dataSource = $dataSource;
+			$this->keySource = $keySource;
 		}
 		
 		function addCache($cache)
@@ -53,14 +55,14 @@
 		
 		function toStack($name)
 		{
-			$stack = $this->stackFactory($this->reader, $this->caches);
+			$stack = $this->stackFactory($this->dataSource, $this->keySource, $this->caches);
 			$this->map->set($name, $stack);
 			return $stack;
 		}
 		
-		protected function stackFactory($reader, $stack)
+		protected function stackFactory($dataSource, $keySource, $stack)
 		{
-			return new LayerCache_Stack($reader, $stack);
+			return new LayerCache_Stack($dataSource, $keySource, $stack);
 		}
 	}
 	
