@@ -47,8 +47,8 @@
 			else
 				$read_func = $dataSource;
 			
-			if (is_object($keySource))
-				$key_func = array($keySource, 'normalizeKey');
+			if ($keySource === null && is_object($dataSource))
+				$key_func = array($dataSource, 'normalizeKey');
 			else
 				$key_func = $keySource;
 			
