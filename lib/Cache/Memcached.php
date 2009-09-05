@@ -20,20 +20,18 @@
     @package LayerCache
 	**/
 	
-	class LayerCache_Cache_Memcache
+	class LayerCache_Cache_Memcached
 	{
-		protected $memcache;
-		protected $flags;
+		protected $memcached;
 		
-		function __construct($memcache, $flags = 0)
+		function __construct($memcached)
 		{
-			$this->memcache = $memcache;
-			$this->flags = $flags;
+			$this->memcached = $memcached;
 		}
 		
 		function get($key)
 		{
-			$v = $this->memcache->get($key);
+			$v = $this->memcached->get($key);
 			if ($v === false)
 				return null;
 			else
@@ -42,7 +40,7 @@
 		
 		function set($key, $data, $ttl)
 		{
-			$this->memcache->set($key, serialize($data), $this->flags, $ttl);
+			$this->memcached->set($key, serialize($data), $ttl);
 		}
 	}
 	

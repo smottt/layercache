@@ -34,35 +34,35 @@
 			$this->cache = new LayerCache_Cache_File($dir);
 		}
 		
-		function testReadEmpty()
+		function testGetEmpty()
 		{
-			$this->assertSame(null, $this->cache->read('test'));
+			$this->assertSame(null, $this->cache->get('test'));
 		}
 		
-		function testWriteAndRead()
+		function testSetAndGet()
 		{
-			$this->assertSame(null, $this->cache->read('test'));
-			$this->cache->write('test', 'DATA', 10);
-			$this->assertSame('DATA', $this->cache->read('test'));
+			$this->assertSame(null, $this->cache->get('test'));
+			$this->cache->set('test', 'DATA', 10);
+			$this->assertSame('DATA', $this->cache->get('test'));
 		}
 		
-		function testWriteAndReadComplexStructure()
+		function testSetAndGetComplexStructure()
 		{
-			$this->assertSame(null, $this->cache->read('test'));
+			$this->assertSame(null, $this->cache->get('test'));
 			$o = new StdClass;
 			$o->z = 34;
 			$data = array('x', $o, array('a' => 12));
-			$this->cache->write('test', $data, 10);
-			$this->assertEquals($data, $this->cache->read('test'));
+			$this->cache->set('test', $data, 10);
+			$this->assertEquals($data, $this->cache->get('test'));
 		}
 		
 		function testTTL()
 		{
-			$this->assertSame(null, $this->cache->read('test'));
-			$this->cache->write('test', 'DATA', 1);
-			$this->assertSame('DATA', $this->cache->read('test'));
+			$this->assertSame(null, $this->cache->get('test'));
+			$this->cache->set('test', 'DATA', 1);
+			$this->assertSame('DATA', $this->cache->get('test'));
 			sleep(2);
-			$this->assertSame(null, $this->cache->read('test'));
+			$this->assertSame(null, $this->cache->get('test'));
 		}
 	}
 	

@@ -28,80 +28,80 @@
 		function testUnlimited()
 		{
 			$c = new LayerCache_Cache_Local();
-			$c->write('a', 'AAAAAAAAAAA');
-			$c->write('b', 'AAAAAAAAAAA');
-			$c->write('c', 'AAAAAAAAAAA');
-			$c->write('d', 'AAAAAAAAAAA');
-			$this->assertSame('AAAAAAAAAAA', $c->read('a'));
-			$this->assertSame('AAAAAAAAAAA', $c->read('d'));
-			$this->assertSame('AAAAAAAAAAA', $c->read('c'));
-			$this->assertSame('AAAAAAAAAAA', $c->read('b'));
+			$c->set('a', 'AAAAAAAAAAA');
+			$c->set('b', 'AAAAAAAAAAA');
+			$c->set('c', 'AAAAAAAAAAA');
+			$c->set('d', 'AAAAAAAAAAA');
+			$this->assertSame('AAAAAAAAAAA', $c->get('a'));
+			$this->assertSame('AAAAAAAAAAA', $c->get('d'));
+			$this->assertSame('AAAAAAAAAAA', $c->get('c'));
+			$this->assertSame('AAAAAAAAAAA', $c->get('b'));
 		}
 		
 		function testCountLimit()
 		{
 			$c = new LayerCache_Cache_Local(0, 2);
-			$this->assertSame(null, $c->read('a'));
+			$this->assertSame(null, $c->get('a'));
 			
-			$c->write('a', 'A');
-			$this->assertSame('A', $c->read('a'));
+			$c->set('a', 'A');
+			$this->assertSame('A', $c->get('a'));
 			
-			$c->write('x', 'X');
-			$c->write('y', 'Y');
-			$c->write('z', 'Z');
-			$this->assertSame(null, $c->read('a'));
-			$this->assertSame(null, $c->read('x'));
-			$this->assertSame('Y', $c->read('y'));
-			$this->assertSame('Z', $c->read('z'));
+			$c->set('x', 'X');
+			$c->set('y', 'Y');
+			$c->set('z', 'Z');
+			$this->assertSame(null, $c->get('a'));
+			$this->assertSame(null, $c->get('x'));
+			$this->assertSame('Y', $c->get('y'));
+			$this->assertSame('Z', $c->get('z'));
 			
-			$c->write('z', 'Z2');
-			$this->assertSame('Y', $c->read('y'));
-			$this->assertSame('Z2', $c->read('z'));
+			$c->set('z', 'Z2');
+			$this->assertSame('Y', $c->get('y'));
+			$this->assertSame('Z2', $c->get('z'));
 		}
 		
 		function testSizeLimit()
 		{
 			$c = new LayerCache_Cache_Local(10, 0);
-			$this->assertSame(null, $c->read('a'));
+			$this->assertSame(null, $c->get('a'));
 			
-			$c->write('a', 'AAAAA');
-			$this->assertSame('AAAAA', $c->read('a'));
+			$c->set('a', 'AAAAA');
+			$this->assertSame('AAAAA', $c->get('a'));
 			
-			$c->write('x', 'XXXXX');
-			$c->write('y', 'YYY');
-			$this->assertSame(null, $c->read('a'));
-			$this->assertSame('XXXXX', $c->read('x'));
-			$this->assertSame('YYY', $c->read('y'));
+			$c->set('x', 'XXXXX');
+			$c->set('y', 'YYY');
+			$this->assertSame(null, $c->get('a'));
+			$this->assertSame('XXXXX', $c->get('x'));
+			$this->assertSame('YYY', $c->get('y'));
 			
-			$c->write('y', 'YYYYYYY');
-			$this->assertSame(null, $c->read('x'));
-			$this->assertSame('YYYYYYY', $c->read('y'));
+			$c->set('y', 'YYYYYYY');
+			$this->assertSame(null, $c->get('x'));
+			$this->assertSame('YYYYYYY', $c->get('y'));
 			
-			$c->write('a', 'AAAAA');
-			$this->assertSame('AAAAA', $c->read('a'));
-			$c->write('b', 'BBBBB');
-			$this->assertSame('AAAAA', $c->read('a'));
-			$this->assertSame('BBBBB', $c->read('b'));
-			$c->write('c', 'CCCCCC');
-			$this->assertSame(null, $c->read('a'));
-			$this->assertSame(null, $c->read('b'));
-			$this->assertSame('CCCCCC', $c->read('c'));
+			$c->set('a', 'AAAAA');
+			$this->assertSame('AAAAA', $c->get('a'));
+			$c->set('b', 'BBBBB');
+			$this->assertSame('AAAAA', $c->get('a'));
+			$this->assertSame('BBBBB', $c->get('b'));
+			$c->set('c', 'CCCCCC');
+			$this->assertSame(null, $c->get('a'));
+			$this->assertSame(null, $c->get('b'));
+			$this->assertSame('CCCCCC', $c->get('c'));
 			
-			$c->write('y', 'YYYYYYYYYYYYYYYY');
-			$this->assertSame(null, $c->read('y'));
+			$c->set('y', 'YYYYYYYYYYYYYYYY');
+			$this->assertSame(null, $c->get('y'));
 		}
 		
 		function testEvictsLeastRecent()
 		{
 			$c = new LayerCache_Cache_Local(0, 2);
-			$c->write('a', 'A');
-			$c->write('b', 'B');
-			$this->assertSame('B', $c->read('b'));
-			$this->assertSame('A', $c->read('a'));
-			$c->write('c', 'C');
-			$this->assertSame('A', $c->read('a'));
-			$this->assertSame(null, $c->read('b'));
-			$this->assertSame('C', $c->read('c'));
+			$c->set('a', 'A');
+			$c->set('b', 'B');
+			$this->assertSame('B', $c->get('b'));
+			$this->assertSame('A', $c->get('a'));
+			$c->set('c', 'C');
+			$this->assertSame('A', $c->get('a'));
+			$this->assertSame(null, $c->get('b'));
+			$this->assertSame('C', $c->get('c'));
 		}
 	}
 	

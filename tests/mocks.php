@@ -33,11 +33,11 @@
 	
 	class FakeCache
 	{
-		function read($key)
+		function get($key)
 		{
 		}
 		
-		function write($key, $data, $ttl)
+		function set($key, $data, $ttl)
 		{
 		}
 	}

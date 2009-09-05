@@ -33,24 +33,24 @@
 			apc_delete('test');
 		}
 		
-		function testWriteAndRead()
+		function testSetAndGet()
 		{
 			$cache = new LayerCache_Cache_APC();
-			$this->assertSame(null, $cache->read('test'));
+			$this->assertSame(null, $cache->get('test'));
 			
-			$cache->write('test', 'DATA', 1);
+			$cache->set('test', 'DATA', 1);
 			$this->assertSame(serialize('DATA'), apc_fetch('test'));
-			$this->assertSame('DATA', $cache->read('test'));
+			$this->assertSame('DATA', $cache->get('test'));
 		}
 		
-		function testWriteAndReadComplexStructure()
+		function testSetAndGetComplexStructure()
 		{
 			$cache = new LayerCache_Cache_APC();
-			$this->assertSame(null, $cache->read('test'));
+			$this->assertSame(null, $cache->get('test'));
 			$o = new StdClass;
 			$o->z = 34;
-			$cache->write('test', array('x', $o, array('a' => 12)), 10);
-			$this->assertEquals(array('x', $o, array('a' => 12)), $cache->read('test'));
+			$cache->set('test', array('x', $o, array('a' => 12)), 10);
+			$this->assertEquals(array('x', $o, array('a' => 12)), $cache->get('test'));
 		}
 
 	}

@@ -40,7 +40,7 @@
 			$this->maxItems = $maxItems;
 		}
 		
-		function read($key)
+		function get($key)
 		{
 			if (isset($this->items[$key]))
 			{
@@ -51,7 +51,7 @@
 			}
 		}
 		
-		function write($key, $data)
+		function set($key, $data)
 		{
 			if (isset($this->items[$key]))
 			{

@@ -34,7 +34,7 @@
 				throw new RuntimeException("Directory doesn't exist.");
 		}
 		
-		function read($key)
+		function get($key)
 		{
 			$fname = $this->dir . sha1($key);
 			if (!file_exists($fname))
@@ -47,7 +47,7 @@
 			return unserialize($data[1]);
 		}
 		
-		function write($key, $data, $ttl)
+		function set($key, $data, $ttl)
 		{
 			$fname = $this->dir . sha1($key);
 			$temp_name = $fname . '-' . mt_rand(10000, 99999);

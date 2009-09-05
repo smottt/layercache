@@ -22,7 +22,7 @@
 	
 	class LayerCache_Cache_XCache
 	{
-		function read($key)
+		function get($key)
 		{
 			$v = xcache_get($key);
 			if ($v === false)
@@ -31,7 +31,7 @@
 				return unserialize($v);
 		}
 		
-		function write($key, $data, $ttl)
+		function set($key, $data, $ttl)
 		{
 			xcache_set($key, serialize($data), $ttl);
 		}

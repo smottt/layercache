@@ -54,7 +54,7 @@
 				
 				foreach ($this->caches as $i => $cache)
 				{
-					$entry = $cache['cache']->read($nk);
+					$entry = $cache['cache']->get($nk);
 					
 					if ($entry === null || !isset($entry['data']) || !isset($entry['expires']) || 
 						($now + $cache['prefetchTime'] >= $entry['expires'] && $r <= $cache['prefetchProbability']))
@@ -76,7 +76,7 @@
 			{
 				$cache = $this->caches[$i];
 				$entry = array('data' => $data, 'expires' => $now + $cache['ttl']);
-				$cache['cache']->write($nk, $entry, $cache['ttl']);
+				$cache['cache']->set($nk, $entry, $cache['ttl']);
 			}
 			
 			return $data;
@@ -89,7 +89,7 @@
 			foreach ($this->caches as $cache)
 			{
 				$entry = array('data' => $data, 'expires' => $now + $cache['ttl']);
-				$cache['cache']->write($nk, $entry, $cache['ttl']);
+				$cache['cache']->set($nk, $entry, $cache['ttl']);
 			}
 		}
 	}

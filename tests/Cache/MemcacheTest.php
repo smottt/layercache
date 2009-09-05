@@ -31,15 +31,15 @@
 				$this->markTestSkipped("Memcache extension not available.");
 		}
 		
-		function testReadEmpty()
+		function testGetEmpty()
 		{
 			$mc = $this->getMock('Memcache', array('get'));
 			$mc->expects($this->once())->method('get')->with('test')->will($this->returnValue(false));
 			$cache = new LayerCache_Cache_Memcache($mc);
-			$this->assertSame(null, $cache->read('test'));
+			$this->assertSame(null, $cache->get('test'));
 		}
 		
-		function testWriteAndRead()
+		function testSetAndGet()
 		{
 			$mc = $this->getMock('Memcache', array('get', 'set'));
 			
@@ -48,12 +48,12 @@
 			$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue(serialize('DATA')));
 			
 			$cache = new LayerCache_Cache_Memcache($mc);
-			$this->assertSame(null, $cache->read('test'));
-			$cache->write('test', 'DATA', 10);
-			$this->assertSame('DATA', $cache->read('test'));
+			$this->assertSame(null, $cache->get('test'));
+			$cache->set('test', 'DATA', 10);
+			$this->assertSame('DATA', $cache->get('test'));
 		}
 		
-		function testWriteAndReadComplexStructure()
+		function testSetAndGetComplexStructure()
 		{
 			$mc = $this->getMock('Memcache', array('get', 'set'));
 			
@@ -66,9 +66,9 @@
 			$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue(serialize($data)));
 			
 			$cache = new LayerCache_Cache_Memcache($mc, 7);
-			$this->assertSame(null, $cache->read('test'));
-			$cache->write('test', $data, 10);
-			$this->assertEquals($data, $cache->read('test'));
+			$this->assertSame(null, $cache->get('test'));
+			$cache->set('test', $data, 10);
+			$this->assertEquals($data, $cache->get('test'));
 		}
 	}
 	

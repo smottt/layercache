@@ -22,7 +22,7 @@
 	
 	class LayerCache_Cache_APC
 	{
-		function read($key)
+		function get($key)
 		{
 			$v = apc_fetch($key);
 			if ($v === false)
@@ -31,7 +31,7 @@
 				return unserialize($v);
 		}
 		
-		function write($key, $data, $ttl)
+		function set($key, $data, $ttl)
 		{
 			apc_store($key, serialize($data), $ttl);
 		}
