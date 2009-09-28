@@ -62,7 +62,7 @@
 		
 		static function hasStack($name)
 		{
-			return self::$map->has($name);
+			return self::$map && self::$map->has($name);
 		}
 	}
 	
