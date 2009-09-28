@@ -49,6 +49,8 @@
 			
 			if ($keySource === null && is_object($dataSource))
 				$key_func = array($dataSource, 'normalizeKey');
+			elseif ($keySource === null && is_array($dataSource))
+				$key_func = array($dataSource[0], 'normalizeKey');
 			else
 				$key_func = $keySource;
 			
