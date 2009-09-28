@@ -36,5 +36,10 @@
 			
 			return $this->stacks[$name];
 		}
+		
+		function has($name)
+		{
+			return isset($this->stacks[$name]);
+		}
 	}
 	

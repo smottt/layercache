@@ -59,6 +59,11 @@
 		{
 			return self::$map->get($name);
 		}
+		
+		static function hasStack($name)
+		{
+			return self::$map->has($name);
+		}
 	}
 	
 	require_once LayerCache::path() . '/Stack.php';
