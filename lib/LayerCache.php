@@ -69,4 +69,6 @@
 	require_once LayerCache::path() . '/Cache/APC.php';
 	require_once LayerCache::path() . '/Cache/File.php';
 	require_once LayerCache::path() . '/Cache/Memcache.php';
+	require_once LayerCache::path() . '/Cache/Memcached.php';
+	require_once LayerCache::path() . '/Cache/XCache.php';
 	
