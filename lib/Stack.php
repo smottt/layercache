@@ -40,7 +40,7 @@
 			}
 		}
 		
-		function get($key)
+		function get($key = null)
 		{
 			$c = count($this->caches);
 			$emptyList = array();
@@ -52,17 +52,23 @@
 				$nk = call_user_func($this->keyCallback, $key);
 				$r = mt_rand(1, $this->probabilityFactor);
 				
+				Debug::write("key($key) nk=$nk r=$r");
+				
 				foreach ($this->caches as $i => $cache)
 				{
 					$entry = $cache['cache']->get($nk);
+					Debug::write("cache $i (prefetch: {$cache['prefetchTime']}, {$cache['prefetchProbability']}) t={$now} pf=" . ($now + $cache['prefetchTime']));
+					Debug::write($entry);
 					
 					if ($entry === null || !isset($entry['data']) || !isset($entry['expires']) || 
 						($now + $cache['prefetchTime'] >= $entry['expires'] && $r <= $cache['prefetchProbability']))
 					{
+						Debug::write("prefetch or inexistent");
 						$emptyList[] = $i;
 					}
 					else
 					{
+						Debug::write('present and valid');
 						$data = $entry['data'];
 						break;
 					}
@@ -78,6 +84,8 @@
 				$entry = array('data' => $data, 'expires' => $now + $cache['ttl']);
 				$cache['cache']->set($nk, $entry, $cache['ttl']);
 			}
+			
+			Debug::write($data);
 			
 			return $data;
 		}
