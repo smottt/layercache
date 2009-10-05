@@ -60,8 +60,8 @@
 					Debug::write("cache $i (prefetch: {$cache['prefetchTime']}, {$cache['prefetchProbability']}) t={$now} pf=" . ($now + $cache['prefetchTime']));
 					Debug::write($entry);
 					
-					if ($entry === null || !isset($entry['data']) || !isset($entry['expires']) || 
-						($now + $cache['prefetchTime'] >= $entry['expires'] && $r <= $cache['prefetchProbability']))
+					if ($entry === null || !isset($entry['d']) || !isset($entry['e']) || 
+						($now + $cache['prefetchTime'] >= $entry['e'] && $r <= $cache['prefetchProbability']))
 					{
 						Debug::write("prefetch or inexistent");
 						$emptyList[] = $i;
@@ -69,7 +69,7 @@
 					else
 					{
 						Debug::write('present and valid');
-						$data = $entry['data'];
+						$data = $entry['d'];
 						break;
 					}
 				}
@@ -81,7 +81,7 @@
 			foreach ($emptyList as $i)
 			{
 				$cache = $this->caches[$i];
-				$entry = array('data' => $data, 'expires' => $now + $cache['ttl']);
+				$entry = array('d' => $data, 'e' => $now + $cache['ttl']);
 				$cache['cache']->set($nk, $entry, $cache['ttl']);
 			}
 			
@@ -96,7 +96,7 @@
 			$nk = call_user_func($this->keyCallback, $key);
 			foreach ($this->caches as $cache)
 			{
-				$entry = array('data' => $data, 'expires' => $now + $cache['ttl']);
+				$entry = array('d' => $data, 'e' => $now + $cache['ttl']);
 				$cache['cache']->set($nk, $entry, $cache['ttl']);
 			}
 		}
