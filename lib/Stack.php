@@ -75,7 +75,7 @@
 				}
 			}
 			
-			if (!$data)
+			if ($data === null)
 				$data = call_user_func($this->dataCallback, $key);
 			
 			foreach ($emptyList as $i)
