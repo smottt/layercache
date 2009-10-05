@@ -29,10 +29,10 @@
 		function testWithoutCache()
 		{
 			$source = $this->getMock('FakeSource', array('get'));
-			$source->expects($this->once())->method('get')->with(5)->will($this->returnValue('data'));
+			$source->expects($this->once())->method('get')->with(5)->will($this->returnValue('d'));
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), array());
-			$this->assertSame('data', $stack->get(5));
+			$this->assertSame('d', $stack->get(5));
 		}
 		
 		function testSet()
@@ -43,11 +43,11 @@
 			
 			$cache1 = $this->getMock('FakeCache', array('get', 'set'));
 			$cache1->expects($this->never())->method('get');
-			$cache1->expects($this->once())->method('set')->with('k:5', array('data' => 'DATA', 'expires' => time() + 7), 7);
+			$cache1->expects($this->once())->method('set')->with('k:5', array('d' => 'DATA', 'e' => time() + 7), 7);
 			
 			$cache2 = $this->getMock('FakeCache', array('get', 'set'));
 			$cache2->expects($this->never())->method('get');
-			$cache2->expects($this->once())->method('set')->with('k:5', array('data' => 'DATA', 'expires' => time() + 15), 15);
+			$cache2->expects($this->once())->method('set')->with('k:5', array('d' => 'DATA', 'e' => time() + 15), 15);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
@@ -60,12 +60,12 @@
 		function testWithSingleEmptyCache()
 		{
 			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
-			$source->expects($this->once())->method('get')->with(5)->will($this->returnValue('data'));
+			$source->expects($this->once())->method('get')->with(5)->will($this->returnValue('d'));
 			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
 			
 			$cache = $this->getMock('FakeCache', array('get', 'set'));
 			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(null));
-			$cache->expects($this->once())->method('set')->with('k:5', array('data' => 'data', 'expires' => time() + 7), 7);
+			$cache->expects($this->once())->method('set')->with('k:5', array('d' => 'd', 'e' => time() + 7), 7);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'),
 				array(array('cache' => $cache, 'ttl' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1)));
@@ -79,7 +79,7 @@
 			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
 			
 			$cache = $this->getMock('FakeCache', array('get'));
-			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('expires' => time() + 15, 'data' => 'DATA')));
+			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 15, 'd' => 'DATA')));
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 10, 'prefetchProbability' => 1)));
@@ -93,8 +93,8 @@
 			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
 			
 			$cache = $this->getMock('FakeCache', array('get', 'set'));
-			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('expires' => time() + 10, 'data' => 'OLD DATA')));
-			$cache->expects($this->once())->method('set')->with('k:5', array('expires' => time() + 60, 'data' => 'NEW DATA'), 60);
+			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 10, 'd' => 'OLD DATA')));
+			$cache->expects($this->once())->method('set')->with('k:5', array('e' => time() + 60, 'd' => 'NEW DATA'), 60);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(array('cache' => $cache, 'ttl' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1)));
@@ -108,12 +108,12 @@
 			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
 			
 			$cache1 = $this->getMock('FakeCache', array('get', 'set'));
-			$cache1->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('expires' => time() + 20, 'data' => 'DATA 1')));
+			$cache1->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 20, 'd' => 'DATA 1')));
 			$cache1->expects($this->never())->method('set');
 			
 			$cache2 = $this->getMock('FakeCache', array('get', 'set'));
-			$cache2->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('expires' => time() + 10, 'data' => 'DATA 2')));
-			$cache2->expects($this->once())->method('set')->with('k:5', array('expires' => time() + 30, 'data' => 'DATA 1'), 30);
+			$cache2->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 10, 'd' => 'DATA 2')));
+			$cache2->expects($this->once())->method('set')->with('k:5', array('e' => time() + 30, 'd' => 'DATA 1'), 30);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
@@ -131,12 +131,12 @@
 			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
 			
 			$cache1 = $this->getMock('FakeCache', array('get', 'set'));
-			$cache1->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('expires' => time() + 5, 'data' => 'DATA 1')));
-			$cache1->expects($this->once())->method('set')->with('k:5', array('expires' => time() + 60, 'data' => 'NEW DATA'), 60);
+			$cache1->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 5, 'd' => 'DATA 1')));
+			$cache1->expects($this->once())->method('set')->with('k:5', array('e' => time() + 60, 'd' => 'NEW DATA'), 60);
 			
 			$cache2 = $this->getMock('FakeCache');
-			$cache2->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('expires' => time() + 10, 'data' => 'DATA 2')));
-			$cache2->expects($this->once())->method('set')->with('k:5', array('expires' => time() + 30, 'data' => 'NEW DATA'), 30);
+			$cache2->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 10, 'd' => 'DATA 2')));
+			$cache2->expects($this->once())->method('set')->with('k:5', array('e' => time() + 30, 'd' => 'NEW DATA'), 30);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
