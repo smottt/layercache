@@ -20,6 +20,10 @@
     @package LayerCache
 	**/
 	
+	/**
+	 * @package LayerCache
+	 * @author Gasper Kozak
+	 */
 	class LayerCache_StackBuilder
 	{
 		protected $map;
@@ -34,18 +38,37 @@
 			$this->keySource = $keySource;
 		}
 		
+		/**
+		 * Adds a cache to the stack specification
+		 * 
+		 * @param object $cache
+		 * @return LayerCache_StackBuilder $this
+		 */
 		function addCache($cache)
 		{
 			$this->caches[] = array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1);
 			return $this;
 		}
 		
+		/**
+		 * Adds TTL to the specification
+		 * 
+		 * @param int $ttl
+		 * @return LayerCache_StackBuilder $this
+		 */
 		function withTTL($ttl)
 		{
 			$this->caches[count($this->caches) - 1]['ttl'] = $ttl;
 			return $this;
 		}
 		
+		/**
+		 * Adds a prefetch feature to the stack specification
+		 * 
+		 * @param int $time
+		 * @param float $probability
+		 * @return LayerCache_StackBuilder $this
+		 */
 		function withPrefetch($time, $probability)
 		{
 			$this->caches[count($this->caches) - 1]['prefetchTime'] = $time;
@@ -53,6 +76,12 @@
 			return $this;
 		}
 		
+		/**
+		 * Creates a stack from the specification and adds it to the cache stack registry
+		 * 
+		 * @param string $name
+		 * @return LayerCache_Stack
+		 */
 		function toStack($name)
 		{
 			$stack = $this->stackFactory($this->dataSource, $this->keySource, $this->caches);
@@ -60,6 +89,16 @@
 			return $stack;
 		}
 		
+		/**
+		 * Creates a stack from specification.
+		 * 
+		 * Internal method, used for unit testing
+		 * 
+		 * @param callback $dataSource
+		 * @param callback $keySource
+		 * @param array $stack
+		 * @return LayerCache_Stack
+		 */
 		protected function stackFactory($dataSource, $keySource, $stack)
 		{
 			return new LayerCache_Stack($dataSource, $keySource, $stack);

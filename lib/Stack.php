@@ -20,6 +20,10 @@
     @package LayerCache
 	**/
 	
+	/**
+	 * @package LayerCache
+	 * @author Gasper Kozak
+	 */
 	class LayerCache_Stack
 	{
 		protected $dataCallback;
@@ -40,6 +44,15 @@
 			}
 		}
 		
+		/**
+		 * Returns a value for a specific key
+		 * 
+		 * Calls key normalization method first, then iterates over the caches and reads data. 
+		 * If no cache contains the data, the data retrieval method is called, and the result is written to all caches.
+		 * 
+		 * @param mixed $key Custom key
+		 * @return mixed
+		 */
 		function get($key = null)
 		{
 			$c = count($this->caches);
@@ -81,6 +94,12 @@
 			return $data;
 		}
 		
+		/**
+		 * Sets data in all caches
+		 * 
+		 * @param mixed $key Custom key
+		 * @param mixed $data
+		 */
 		function set($key, $data)
 		{
 			$now = time();

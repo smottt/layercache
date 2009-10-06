@@ -20,10 +20,19 @@
     @package LayerCache
 	**/
 	
+	/**
+	 * @package LayerCache
+	 * @author Gasper Kozak
+	 */
 	class LayerCache
 	{
 		protected static $map;
 		
+		/**
+		 * Returns the path to the library
+		 * 
+		 * @return string Library path
+		 */
 		static function path()
 		{
 			static $path;
@@ -32,11 +41,23 @@
 			return $path;
 		}
 		
+		/**
+		 * Returns the version of the library
+		 * 
+		 * @return string Version of the library
+		 */
 		static function version()
 		{
 			return '##VERSION##';
 		}
 		
+		/**
+		 * Returns a stack builder object for further specification
+		 * 
+		 * @param mixed $dataSource
+		 * @param mixed $keySource
+		 * @return LayerCache_StackBuilder
+		 */
 		static function forSource($dataSource, $keySource = null)
 		{
 			if (self::$map === null)
@@ -57,11 +78,23 @@
 			return new LayerCache_StackBuilder(self::$map, $read_func, $key_func);
 		}
 		
+		/**
+		 * Returns a named stack
+		 * 
+		 * @param string $name
+		 * @return LayerCache_Stack
+		 */
 		static function stack($name)
 		{
 			return self::$map->get($name);
 		}
 		
+		/**
+		 * Returns true if stack exists, false otherwise
+		 * 
+		 * @param string $name
+		 * @return bool
+		 */
 		static function hasStack($name)
 		{
 			return self::$map && self::$map->has($name);

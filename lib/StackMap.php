@@ -20,15 +20,33 @@
     @package LayerCache
 	**/
 	
+	/**
+	 * @package LayerCache
+	 * @author Gasper Kozak
+	 */
 	class LayerCache_StackMap
 	{
 		protected $stacks = array();
 		
+		/**
+		 * Sets a named cache stack
+		 *  
+		 * @param string $name
+		 * @param LayerCache_Stack $stack
+		 */
 		function set($name, $stack)
 		{
 			$this->stacks[$name] = $stack;
 		}
 		
+		/**
+		 * Returns a named cache stack
+		 *  
+		 * Throws an exception if stack doesn't exist
+		 *  
+		 * @param string $name
+		 * @return LayerCache_Stack
+		 */
 		function get($name)
 		{
 			if (!isset($this->stacks[$name]))
@@ -37,6 +55,12 @@
 			return $this->stacks[$name];
 		}
 		
+		/**
+		 * Returns true if the stack exists, false otherwise
+		 * 
+		 * @param string $name
+		 * @return bool
+		 */
 		function has($name)
 		{
 			return isset($this->stacks[$name]);
