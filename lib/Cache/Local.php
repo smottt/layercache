@@ -61,7 +61,7 @@
 			}
 			
 			$this->count++;
-			$size = strlen($data);
+			$size = strlen(serialize($data));
 			$this->size += $size;
 			$this->items[$key] = array('size' => $size, 'data' => $data);
 			
