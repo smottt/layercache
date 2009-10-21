@@ -69,6 +69,7 @@
 				{
 					$entry = $cache['cache']->get($nk);
 					if ($entry === null || !isset($entry['d']) || !isset($entry['e']) || 
+						($now >= $entry['e']) ||
 						($now + $cache['prefetchTime'] >= $entry['e'] && $r <= $cache['prefetchProbability']))
 					{
 						$emptyList[] = $i;
