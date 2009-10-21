@@ -103,5 +103,14 @@
 			$this->assertSame(null, $c->get('b'));
 			$this->assertSame('C', $c->get('c'));
 		}
+		
+		function testStoreArraySerialize()
+		{
+			$c = new LayerCache_Cache_Local(40, 0);
+			$c->set('a', array('AAAAA'));
+			$c->set('b', array('BBBBB'));
+			$this->assertSame(null, $c->get('a'));
+			$this->assertSame(array('BBBBB'), $c->get('b'));
+		}
 	}
 	

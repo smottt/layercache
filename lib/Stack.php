@@ -68,8 +68,8 @@
 				foreach ($this->caches as $i => $cache)
 				{
 					$entry = $cache['cache']->get($nk);
-					if ($entry === null || !isset($entry['d']) || !isset($entry['e']) || 
-						($now >= $entry['e']) ||
+					if (!$entry || !isset($entry['d']) || !isset($entry['e']) || !is_numeric($entry['e']) || 
+						$now >= $entry['e'] ||
 						($now + $cache['prefetchTime'] >= $entry['e'] && $r <= $cache['prefetchProbability']))
 					{
 						$emptyList[] = $i;
