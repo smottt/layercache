@@ -34,12 +34,24 @@
 		protected $size = 0;
 		protected $count = 0;
 		
+		/**
+		 * Creates a local cache (php array) instance
+		 * 
+		 * @param int $maxSize Max allowed size for all items
+		 * @param int $maxItems Max allowed entries in the cache
+		 */
 		function __construct($maxSize = 0, $maxItems = 0)
 		{
 			$this->maxSize = $maxSize;
 			$this->maxItems = $maxItems;
 		}
 		
+		/**
+		 * Returns the value for the key, or null if it doesn't exist
+		 * 
+		 * @param string $key Normalized key
+		 * @return mixed Cached entry or null
+		 */
 		function get($key)
 		{
 			if (isset($this->items[$key]))
@@ -51,7 +63,14 @@
 			}
 		}
 		
-		function set($key, $data)
+		/**
+		 * Sets the value in the array
+		 * 
+		 * @param string $key Normalized key
+		 * @param mixed $data Data
+		 * @param int $ttl TTL isn't supported for this type of cache
+		 */
+		function set($key, $data, $ttl)
 		{
 			if (isset($this->items[$key]))
 			{
@@ -74,6 +93,9 @@
 				$this->evict();
 		}
 		
+		/**
+		 * Evicts a single item
+		 */
 		protected function evict()
 		{
 			$k = key($this->items);

@@ -26,11 +26,37 @@
 	 */
 	class LayerCache_Stack
 	{
+		/**
+		 * Data retrieval callback method
+		 * @var callback
+		 */
 		protected $dataCallback;
+		
+		/**
+		 * Key normalization callback
+		 * @var callback
+		 */
 		protected $keyCallback;
+		
+		/**
+		 * An array of caches
+		 * @var array
+		 */
 		protected $caches = array();
+		
+		/**
+		 * Probability factor for prefetch
+		 * @var int
+		 */
 		protected $probabilityFactor = 1000000;
 		
+		/**
+		 * Creates a stack with callbacks and caches
+		 * 
+		 * @param callback $dataCallback Data retrieval callback method
+		 * @param callback $keyCallback Key normalization callback method
+		 * @param array $caches An array of caches
+		 */
 		function __construct($dataCallback, $keyCallback, array $caches = array())
 		{
 			$this->dataCallback = $dataCallback;

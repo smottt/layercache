@@ -26,6 +26,10 @@
 	 */
 	class LayerCache_StackMap
 	{
+		/**
+		 * An array of stacks
+		 * @var array
+		 */
 		protected $stacks = array();
 		
 		/**

@@ -31,6 +31,16 @@
 		protected $keySource;
 		protected $caches = array();
 		
+		/**
+		 * Creates a builder with a cache map and source
+		 * 
+		 * When the method toStack() is called, 
+		 * StackBuilder writes an instance of LayerCache_Stack to the $map.
+		 * 
+		 * @param LayerCache_StackMap $map
+		 * @param callback $dataSource
+		 * @param callback $keySource
+		 */
 		function __construct(LayerCache_StackMap $map, $dataSource, $keySource)
 		{
 			$this->map = $map;
@@ -41,7 +51,7 @@
 		/**
 		 * Adds a cache to the stack specification
 		 * 
-		 * @param object $cache
+		 * @param object $cache An arbitrary object that implements get($key) and set($key, $data, $ttl) methods
 		 * @return LayerCache_StackBuilder $this
 		 */
 		function addCache($cache)
