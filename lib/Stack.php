@@ -95,7 +95,7 @@
 				{
 					$entry = $cache['cache']->get($nk);
 					if (!$entry || !isset($entry['d']) || !isset($entry['e']) || !is_numeric($entry['e']) || 
-						$now >= $entry['e'] ||
+						($now >= $entry['e'] && $cache['ttl'] > 0) ||
 						($now + $cache['prefetchTime'] >= $entry['e'] && $r <= $cache['prefetchProbability']))
 					{
 						$emptyList[] = $i;
