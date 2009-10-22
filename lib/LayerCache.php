@@ -101,7 +101,6 @@
 		}
 	}
 	
-	require_once LayerCache::path() . '/Cache.php';
 	require_once LayerCache::path() . '/Stack.php';
 	require_once LayerCache::path() . '/StackMap.php';
 	require_once LayerCache::path() . '/StackBuilder.php';

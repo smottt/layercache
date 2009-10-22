@@ -68,9 +68,8 @@
 		 * 
 		 * @param string $key Normalized key
 		 * @param mixed $data Data
-		 * @param int $ttl TTL isn't supported for this type of cache
 		 */
-		function set($key, $data, $ttl)
+		function set($key, $data)
 		{
 			if (isset($this->items[$key]))
 			{
