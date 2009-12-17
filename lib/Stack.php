@@ -155,7 +155,7 @@
 			if ($method == 'serialize')
 				return unserialize($data);
 			elseif ($method == 'json')
-				return json_decode($data);
+				return json_decode($data, true);
 			else
 				return $data;
 		}
