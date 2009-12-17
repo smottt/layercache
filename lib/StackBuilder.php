@@ -56,7 +56,7 @@
 		 */
 		function addCache($cache)
 		{
-			$this->caches[] = array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1);
+			$this->caches[] = array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serialize' => null);
 			return $this;
 		}
 		
@@ -69,6 +69,20 @@
 		function withTTL($ttl)
 		{
 			$this->caches[count($this->caches) - 1]['ttl'] = $ttl;
+			return $this;
+		}
+		
+		/**
+		 * Specifies the serialization method
+		 * 
+		 * Pass NULL if you wish to use cache-specific serialization (usually serialize).
+		 * 
+		 * @param mixed 'json', 'serialize', or null
+		 * @return LayerCache_StackBuilder $this
+		 */
+		function serializeWith($method)
+		{
+			$this->caches[count($this->caches) - 1]['serialize'] = $method;
 			return $this;
 		}
 		
@@ -94,7 +108,7 @@
 		 */
 		function toStack($name)
 		{
-			$stack = $this->stackFactory($this->dataSource, $this->keySource, $this->caches);
+			$stack = $this->stackFactory($this->dataSource, $this->keySource, $this->caches, $this->serializationMethod);
 			$this->map->set($name, $stack);
 			return $stack;
 		}

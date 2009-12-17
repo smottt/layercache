@@ -62,10 +62,10 @@
 			
 			$pb->expects($this->once())->
 				method('stackFactory')->
-				with(array($source, 'get'), array($source, 'normalizeKey'), array(array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1)))->
+				with(array($source, 'get'), array($source, 'normalizeKey'), array(array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serialize' => 'json')))->
 				will($this->returnValue($stack));
 			
-			$p = $pb->addCache($cache)->toStack('fake');
+			$p = $pb->addCache($cache)->serializeWith('json')->toStack('fake');
 			$this->assertSame($p, $stack);
 		}
 		
@@ -84,7 +84,7 @@
 			
 			$pb->expects($this->once())->
 				method('stackFactory')->
-				with(array($source, 'get'), array($source, 'normalizeKey'), array(array('cache' => $cache, 'ttl' => 120, 'prefetchTime' => 20, 'prefetchProbability' => 0.1)))->
+				with(array($source, 'get'), array($source, 'normalizeKey'), array(array('cache' => $cache, 'ttl' => 120, 'prefetchTime' => 20, 'prefetchProbability' => 0.1, 'serialize' => null)))->
 				will($this->returnValue($stack));
 			
 			$p = $pb->addCache($cache)->withTTL(120)->withPrefetch(20, 0.1)->toStack('fake');
@@ -113,13 +113,15 @@
 						'cache' => $cache1, 
 						'ttl' => 0,
 						'prefetchTime' => 20,
-						'prefetchProbability' => 0.1
+						'prefetchProbability' => 0.1,
+						'serialize' => null
 					), 
 					array(
 						'cache' => $cache2,
 						'ttl' => 360, 
 						'prefetchTime' => 0,
-						'prefetchProbability' => 1
+						'prefetchProbability' => 1,
+						'serialize' => null
 					)))->
 				will($this->returnValue($stack));
 			

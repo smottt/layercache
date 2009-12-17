@@ -93,7 +93,8 @@
 				
 				foreach ($this->caches as $i => $cache)
 				{
-					$entry = $cache['cache']->get($nk);
+					$raw_entry = $cache['cache']->get($nk);
+					$entry = $this->unserialize($raw_entry, $cache['serialize']);
 					if (!$entry || !isset($entry['d']) || !isset($entry['e']) || !is_numeric($entry['e']) || 
 						($now >= $entry['e'] && $cache['ttl'] > 0) ||
 						($now + $cache['prefetchTime'] >= $entry['e'] && $r <= $cache['prefetchProbability']))
@@ -115,7 +116,8 @@
 			{
 				$cache = $this->caches[$i];
 				$entry = array('d' => $data, 'e' => $now + $cache['ttl']);
-				$cache['cache']->set($nk, $entry, $cache['ttl']);
+				$raw_entry = $this->serialize($entry, $cache['serialize']);
+				$cache['cache']->set($nk, $raw_entry, $cache['ttl']);
 			}
 			
 			return $data;
@@ -137,5 +139,26 @@
 				$cache['cache']->set($nk, $entry, $cache['ttl']);
 			}
 		}
+		
+		protected function serialize($data, $method)
+		{
+			if ($method == 'serialize')
+				return serialize($data);
+			elseif ($method == 'json')
+				return json_encode($data);
+			else
+				return $data;
+		}
+		
+		protected function unserialize($data, $method)
+		{
+			if ($method == 'serialize')
+				return unserialize($data);
+			elseif ($method == 'json')
+				return json_decode($data);
+			else
+				return $data;
+		}
+		
 	}
 	
