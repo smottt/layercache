@@ -26,7 +26,8 @@
 	 */
 	class LayerCache
 	{
-		protected static $map;
+		protected static $stackMap;
+		protected static $cacheMap;
 		
 		/**
 		 * Returns the path to the library
@@ -50,6 +51,15 @@
 		{
 			return '##VERSION##';
 		}
+
+		/**
+		 * Clears the cache maps and stacks
+		 */
+		static function clear()
+		{
+			self::$stackMap = null;
+			self::$cacheMap = null;
+		}
 		
 		/**
 		 * Returns a stack builder object for further specification
@@ -60,8 +70,8 @@
 		 */
 		static function forSource($dataSource, $keySource = null)
 		{
-			if (self::$map === null)
-				self::$map = new LayerCache_StackMap();
+			if (self::$stackMap === null)
+				self::$stackMap = new LayerCache_ObjectMap();
 			
 			if (is_object($dataSource))
 				$read_func = array($dataSource, 'get');
@@ -75,34 +85,50 @@
 			else
 				$key_func = $keySource;
 			
-			return new LayerCache_StackBuilder(self::$map, $read_func, $key_func);
+			return new LayerCache_StackBuilder(self::$stackMap, $read_func, $key_func);
 		}
 		
 		/**
 		 * Returns a named stack
+		 * 
+		 * Throws an exception if the named stack isn't found.
 		 * 
 		 * @param string $name
 		 * @return LayerCache_Stack
 		 */
 		static function stack($name)
 		{
-			return self::$map->get($name);
+			return self::$stackMap->get($name);
 		}
 		
 		/**
-		 * Returns true if stack exists, false otherwise
+		 * Returns true if the named stack exists, false otherwise
 		 * 
 		 * @param string $name
 		 * @return bool
 		 */
 		static function hasStack($name)
 		{
-			return self::$map && self::$map->has($name);
+			return self::$stackMap && self::$stackMap->has($name);
+		}
+		
+		/**
+		 * Adds a named cache for using with addCache
+		 *
+		 * @param string $name
+		 * @param object $cache
+		 */
+		static function addNamedCache($name, $cache)
+		{
+			if (self::$cacheMap === null)
+				self::$cacheMap = new LayerCache_ObjectMap();
+			
+			self::$cacheMap->set(strtolower($name), $cache);
 		}
 	}
 	
 	require_once LayerCache::path() . '/Stack.php';
-	require_once LayerCache::path() . '/StackMap.php';
+	require_once LayerCache::path() . '/ObjectMap.php';
 	require_once LayerCache::path() . '/StackBuilder.php';
 	
 	require_once LayerCache::path() . '/Cache/Local.php';

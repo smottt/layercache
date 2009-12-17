@@ -31,10 +31,10 @@
 			$source = new FakeSource;
 			$stack = $this->getMock('LayerCache_Stack', array(), array(array($source, 'get'), array($source, 'normalizeKey'), array()));
 			
-			$map = $this->getMock('LayerCache_StackMap');
+			$map = $this->getMock('LayerCache_ObjectMap');
 			$map->expects($this->once())->
 				method('set')->
-				with($this->equalTo('fake', $stack));
+				with('fake', $stack);
 			
 			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
 			
@@ -53,10 +53,10 @@
 			$stack = $this->getMock('LayerCache_Stack', array(), array(array($source, 'get'), array($source, 'normalizeKey'), array()));
 			$cache = new FakeCache;
 			
-			$map = $this->getMock('LayerCache_StackMap');
+			$map = $this->getMock('LayerCache_ObjectMap');
 			$map->expects($this->once())->
 				method('set')->
-				with($this->equalTo('fake', $stack));
+				with('fake', $stack);
 			
 			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
 			
@@ -75,10 +75,10 @@
 			$stack = $this->getMock('LayerCache_Stack', array(), array(array($source, 'get'), array($source, 'normalizeKey'), array()));
 			$cache = new FakeCache;
 			
-			$map = $this->getMock('LayerCache_StackMap');
+			$map = $this->getMock('LayerCache_ObjectMap');
 			$map->expects($this->once())->
 				method('set')->
-				with($this->equalTo('fake', $stack));
+				with('fake', $stack);
 			
 			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
 			
@@ -98,10 +98,10 @@
 			$cache1 = new FakeCache;
 			$cache2 = new FakeCache;
 			
-			$map = $this->getMock('LayerCache_StackMap');
+			$map = $this->getMock('LayerCache_ObjectMap');
 			$map->expects($this->once())->
 				method('set')->
-				with($this->equalTo('fake', $stack));
+				with('fake', $stack);
 			
 			$pb = $this->getMock('LayerCache_StackBuilder', array('stackFactory'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
 			

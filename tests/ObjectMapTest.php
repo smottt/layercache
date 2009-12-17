@@ -23,20 +23,20 @@
 	require_once 'PHPUnit/Framework.php';
 	include_once dirname(__FILE__) . '/../lib/LayerCache.php';
 	
-	class StackMapTest extends PHPUnit_Framework_TestCase
+	class ObjectMapTest extends PHPUnit_Framework_TestCase
 	{
 		/**
 		 * @expectedException RuntimeException
 		 */
 		function testNoStack()
 		{
-			$map = new LayerCache_StackMap;
+			$map = new LayerCache_ObjectMap;
 			$map->get('Inexistent');
 		}
 		
 		function testSetGet()
 		{
-			$map = new LayerCache_StackMap;
+			$map = new LayerCache_ObjectMap;
 			$stack = new StdClass;
 			$map->set('MyStack', $stack);
 			$this->assertSame($stack, $map->get('MyStack'));

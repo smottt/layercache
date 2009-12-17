@@ -25,6 +25,11 @@
 	
 	class LayerCacheTest extends PHPUnit_Framework_TestCase
 	{
+		function setup()
+		{
+			LayerCache::clear();
+		}
+		
 		function testForSourceReturnsStackBuilder()
 		{
 			$source = new StdClass;
@@ -47,6 +52,32 @@
 			
 			$stack = LayerCache::forSource(array($source, 'getById'), array($source, 'mapKey'))->toStack('X');
 			$this->assertSame('DATA', $stack->get(123));
+		}
+		
+		function testHasStack()
+		{
+			LayerCache::forSource(new StdClass)->toStack('X');
+			$this->assertTrue(LayerCache::hasStack('X'));
+			$this->assertFalse(LayerCache::hasStack('Y'));
+		}
+		
+		function testAddNamedCache()
+		{
+			$c = new StdClass;
+			LayerCache::addNamedCache('mc', $c);
+		}
+		
+		/**
+		 * @expectedException RuntimeException
+		 */
+		function testAddNamedCacheSameNameThrowsUp()
+		{
+			LayerCache::addNamedCache('mc', new StdClass);
+			LayerCache::addNamedCache('mc', new StdClass);
+		}
+		
+		function testCreateWithNamedCache()
+		{
 		}
 	}
 	

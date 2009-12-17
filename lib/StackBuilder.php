@@ -41,7 +41,7 @@
 		 * @param callback $dataSource
 		 * @param callback $keySource
 		 */
-		function __construct(LayerCache_StackMap $map, $dataSource, $keySource)
+		function __construct(LayerCache_ObjectMap $map, $dataSource, $keySource)
 		{
 			$this->map = $map;
 			$this->dataSource = $dataSource;

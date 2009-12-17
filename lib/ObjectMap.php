@@ -24,27 +24,46 @@
 	 * @package LayerCache
 	 * @author Gasper Kozak
 	 */
-	class LayerCache_StackMap
+	class LayerCache_ObjectMap
 	{
 		/**
 		 * An array of stacks
 		 * @var array
 		 */
-		protected $stacks = array();
+		protected $objects = array();
 		
 		/**
-		 * Sets a named cache stack
+		 * 
+		 * @var bool
+		 */
+		protected $writeOnce = true;
+		
+		/**
+		 * Creates an instance of object map
+		 *
+		 * @param bool $writeOnce Determines whether named objects can be overwritten
+		 */
+		function __construct($writeOnce = true)
+		{
+			$this->writeOnce = $writeOnce;
+		}
+		
+		/**
+		 * Sets a named object
 		 *  
 		 * @param string $name
 		 * @param LayerCache_Stack $stack
 		 */
-		function set($name, $stack)
+		function set($name, $object)
 		{
-			$this->stacks[$name] = $stack;
+			if ($this->writeOnce && $this->has($name))
+				throw new RuntimeException("Named object '{$name}' already exists.");
+			
+			$this->objects[$name] = $object;
 		}
 		
 		/**
-		 * Returns a named cache stack
+		 * Returns a named object
 		 *  
 		 * Throws an exception if stack doesn't exist
 		 *  
@@ -53,21 +72,21 @@
 		 */
 		function get($name)
 		{
-			if (!isset($this->stacks[$name]))
-				throw new RuntimeException("No stack map '{$name}' found");
+			if (!isset($this->objects[$name]))
+				throw new RuntimeException("No named object '{$name}' found");
 			
-			return $this->stacks[$name];
+			return $this->objects[$name];
 		}
 		
 		/**
-		 * Returns true if the stack exists, false otherwise
+		 * Returns true if the object exists, false otherwise
 		 * 
 		 * @param string $name
 		 * @return bool
 		 */
 		function has($name)
 		{
-			return isset($this->stacks[$name]);
+			return isset($this->objects[$name]);
 		}
 	}
 	
