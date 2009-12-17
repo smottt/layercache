@@ -37,12 +37,12 @@
 			if ($v === false)
 				return null;
 			else
-				return unserialize($v);
+				return $v;
 		}
 		
 		function set($key, $data, $ttl)
 		{
-			$this->memcache->set($key, serialize($data), $this->flags, $ttl);
+			$this->memcache->set($key, $data, $this->flags, $ttl);
 		}
 	}
 	

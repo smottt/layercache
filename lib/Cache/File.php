@@ -44,7 +44,7 @@
 			if (time() > $data[0])
 				return null;
 			
-			return unserialize($data[1]);
+			return $data[1];
 		}
 		
 		function set($key, $data, $ttl)
@@ -52,7 +52,7 @@
 			$fname = $this->dir . sha1($key);
 			$temp_name = $fname . '-' . mt_rand(10000, 99999);
 			
-			file_put_contents($temp_name, time() + $ttl . "\n" . serialize($data));
+			file_put_contents($temp_name, time() + $ttl . "\n" . $data);
 			rename($temp_name, $fname);
 		}
 	}

@@ -56,7 +56,7 @@
 		 */
 		function addCache($cache)
 		{
-			$this->caches[] = array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serialize' => null);
+			$this->caches[] = array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => 'serialize');
 			return $this;
 		}
 		
@@ -82,7 +82,7 @@
 		 */
 		function serializeWith($method)
 		{
-			$this->caches[count($this->caches) - 1]['serialize'] = $method;
+			$this->caches[count($this->caches) - 1]['serializationMethod'] = $method;
 			return $this;
 		}
 		
@@ -108,7 +108,7 @@
 		 */
 		function toStack($name)
 		{
-			$stack = $this->stackFactory($this->dataSource, $this->keySource, $this->caches, $this->serializationMethod);
+			$stack = $this->stackFactory($this->dataSource, $this->keySource, $this->caches);
 			$this->map->set($name, $stack);
 			return $stack;
 		}

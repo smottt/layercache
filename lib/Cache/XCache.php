@@ -28,12 +28,12 @@
 			if ($v === false)
 				return null;
 			else
-				return unserialize($v);
+				return $v;
 		}
 		
 		function set($key, $data, $ttl)
 		{
-			xcache_set($key, serialize($data), $ttl);
+			xcache_set($key, $data, $ttl);
 		}
 	}
 	

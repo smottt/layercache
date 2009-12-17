@@ -44,8 +44,8 @@
 			$mc = $this->getMock('Memcache', array('get', 'set'));
 			
 			$mc->expects($this->at(0))->method('get')->with('test')->will($this->returnValue(false));
-			$mc->expects($this->at(1))->method('set')->with('test', serialize('DATA'), 0, 10);
-			$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue(serialize('DATA')));
+			$mc->expects($this->at(1))->method('set')->with('test', 'DATA', 0, 10);
+			$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue('DATA'));
 			
 			$cache = new LayerCache_Cache_Memcache($mc);
 			$this->assertSame(null, $cache->get('test'));
@@ -62,13 +62,13 @@
 			$data = array('x', $o, array('a' => 12));
 			
 			$mc->expects($this->at(0))->method('get')->with('test')->will($this->returnValue(false));
-			$mc->expects($this->at(1))->method('set')->with('test', serialize($data), 7, 10);
+			$mc->expects($this->at(1))->method('set')->with('test', $data, 7, 10);
 			$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue(serialize($data)));
 			
 			$cache = new LayerCache_Cache_Memcache($mc, 7);
 			$this->assertSame(null, $cache->get('test'));
 			$cache->set('test', $data, 10);
-			$this->assertEquals($data, $cache->get('test'));
+			$this->assertEquals($data, unserialize($cache->get('test')));
 		}
 	}
 	

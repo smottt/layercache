@@ -28,12 +28,12 @@
 			if ($v === false)
 				return null;
 			else
-				return unserialize($v);
+				return $v;
 		}
 		
 		function set($key, $data, $ttl)
 		{
-			apc_store($key, serialize($data), $ttl);
+			apc_store($key, $data, $ttl);
 		}
 	}
 	

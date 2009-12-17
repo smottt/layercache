@@ -35,12 +35,12 @@
 			if ($v === false)
 				return null;
 			else
-				return unserialize($v);
+				return $v;
 		}
 		
 		function set($key, $data, $ttl)
 		{
-			$this->memcached->set($key, serialize($data), $ttl);
+			$this->memcached->set($key, $data, $ttl);
 		}
 	}
 	

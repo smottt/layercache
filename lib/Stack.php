@@ -94,7 +94,7 @@
 				foreach ($this->caches as $i => $cache)
 				{
 					$raw_entry = $cache['cache']->get($nk);
-					$entry = $this->unserialize($raw_entry, $cache['serialize']);
+					$entry = $this->unserialize($raw_entry, $cache['serializationMethod']);
 					if (!$entry || !isset($entry['d']) || !isset($entry['e']) || !is_numeric($entry['e']) || 
 						($now >= $entry['e'] && $cache['ttl'] > 0) ||
 						($now + $cache['prefetchTime'] >= $entry['e'] && $r <= $cache['prefetchProbability']))
@@ -116,7 +116,7 @@
 			{
 				$cache = $this->caches[$i];
 				$entry = array('d' => $data, 'e' => $now + $cache['ttl']);
-				$raw_entry = $this->serialize($entry, $cache['serialize']);
+				$raw_entry = $this->serialize($entry, $cache['serializationMethod']);
 				$cache['cache']->set($nk, $raw_entry, $cache['ttl']);
 			}
 			

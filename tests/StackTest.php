@@ -80,7 +80,7 @@
 			
 			$cache = $this->getMock('FakeCache', array('get', 'set'));
 			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(null));
-			$cache->expects($this->once())->method('set')->with('k:5', '{"d":"d","e":' . (time() + 7) . '}', 7);
+			$cache->expects($this->once())->method('set')->with('k:5', array("d" => "d", "e" => time() + 7), 7);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'),
 				array(array('cache' => $cache, 'ttl' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serialize' => 'json')));

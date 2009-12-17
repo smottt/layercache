@@ -39,7 +39,7 @@
 			$this->assertSame(null, $cache->get('test'));
 			
 			$cache->set('test', 'DATA', 1);
-			$this->assertSame(serialize('DATA'), apc_fetch('test'));
+			$this->assertSame('DATA', apc_fetch('test'));
 			$this->assertSame('DATA', $cache->get('test'));
 		}
 		
@@ -47,10 +47,8 @@
 		{
 			$cache = new LayerCache_Cache_APC();
 			$this->assertSame(null, $cache->get('test'));
-			$o = new StdClass;
-			$o->z = 34;
-			$cache->set('test', array('x', $o, array('a' => 12)), 10);
-			$this->assertEquals(array('x', $o, array('a' => 12)), $cache->get('test'));
+			$cache->set('test', array('x', array('a' => 12)), 10);
+			$this->assertEquals(array('x', array('a' => 12)), $cache->get('test'));
 		}
 
 	}

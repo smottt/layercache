@@ -52,8 +52,8 @@
 			$o = new StdClass;
 			$o->z = 34;
 			$data = array('x', $o, array('a' => 12));
-			$this->cache->set('test', $data, 10);
-			$this->assertEquals($data, $this->cache->get('test'));
+			$this->cache->set('test', serialize($data), 10);
+			$this->assertEquals($data, unserialize($this->cache->get('test')));
 		}
 		
 		function testTTL()
