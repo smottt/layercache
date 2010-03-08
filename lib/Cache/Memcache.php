@@ -25,7 +25,7 @@
 		protected $memcache;
 		protected $flags;
 		
-		function __construct($memcache, $flags = null)
+		function __construct($memcache, $flags = false)
 		{
 			$this->memcache = $memcache;
 			$this->flags = $flags;
