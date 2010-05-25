@@ -44,7 +44,7 @@
 			$mc = $this->getMock('Memcache', array('get', 'set'));
 			
 			$mc->expects($this->at(0))->method('get')->with('test')->will($this->returnValue(false));
-			$mc->expects($this->at(1))->method('set')->with('test', 'DATA', 0, 10);
+			$mc->expects($this->at(1))->method('set')->with('test', 'DATA', false, 10);
 			$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue('DATA'));
 			
 			$cache = new LayerCache_Cache_Memcache($mc);

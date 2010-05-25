@@ -56,19 +56,28 @@
 		 */
 		function addCache($cache)
 		{
-			$this->caches[] = array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => 'serialize');
+			$this->caches[] = array('cache' => $cache, 'ttl' => 0, 'ttl_empty' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => 'serialize');
 			return $this;
 		}
 		
 		/**
 		 * Adds TTL to the specification
 		 * 
-		 * @param int $ttl
+		 * TTL specifies how much time in seconds the items read from this cache will be treated as valid.
+		 * If an item is older than TTL seconds, it will be treated as non-existent and will be fetched from next cache or source.
+		 * 
+		 * If prefetch is enabled on the cache, the item may also be treated as non-existent, if the reading is issued within the last
+		 * prefetch time seconds of the TTL, and prefetch probability randomly evaluates to true.
+		 * See also LayerCache_StackBuilder::withPrefetch().
+		 * 
+		 * @param int $ttl TTL for the item
+		 * @param int $ttl_empty TTL for the item if it's empty (null, false, emtpy string). If NULL, $ttl is used.
 		 * @return LayerCache_StackBuilder $this
 		 */
-		function withTTL($ttl)
+		function withTTL($ttl, $ttl_empty = null)
 		{
 			$this->caches[count($this->caches) - 1]['ttl'] = $ttl;
+			$this->caches[count($this->caches) - 1]['ttl_empty'] = $ttl_empty === null ? $ttl : $ttl_empty;
 			return $this;
 		}
 		
@@ -89,8 +98,8 @@
 		/**
 		 * Adds a prefetch feature to the stack specification
 		 * 
-		 * @param int $time
-		 * @param float $probability
+		 * @param int $time Prefetch time (must be less than TTL)
+		 * @param float $probability Prefetch probability, valid values are from 0 to 1 inclusive
 		 * @return LayerCache_StackBuilder $this
 		 */
 		function withPrefetch($time, $probability)

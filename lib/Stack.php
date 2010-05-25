@@ -115,9 +115,15 @@
 			foreach ($emptyList as $i)
 			{
 				$cache = $this->caches[$i];
-				$entry = array('d' => $data, 'e' => $now + $cache['ttl']);
+				
+				if (strlen($data) > 0)
+					$ttl = $cache['ttl'];
+				else
+					$ttl = $cache['ttl_empty'];
+				
+				$entry = array('d' => $data, 'e' => $now + $ttl);
 				$raw_entry = $this->serialize($entry, $cache['serializationMethod']);
-				$cache['cache']->set($nk, $raw_entry, $cache['ttl']);
+				$cache['cache']->set($nk, $raw_entry, $ttl);
 			}
 			
 			return $data;

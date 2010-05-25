@@ -51,8 +51,8 @@
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
-					array('cache' => $cache1, 'ttl' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1),
-					array('cache' => $cache2, 'ttl' => 15, 'prefetchTime' => 5, 'prefetchProbability' => 0.5)
+					array('cache' => $cache1, 'ttl' => 7,  'ttl' => 7,  'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => null),
+					array('cache' => $cache2, 'ttl' => 15, 'ttl' => 15, 'prefetchTime' => 5, 'prefetchProbability' => 0.5, 'serializationMethod' => null)
 				));
 			$stack->set(5, 'DATA');
 		}
@@ -68,7 +68,7 @@
 			$cache->expects($this->once())->method('set')->with('k:5', array('d' => 'd', 'e' => time() + 7), 7);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'),
-				array(array('cache' => $cache, 'ttl' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1)));
+				array(array('cache' => $cache, 'ttl' => 7, 'ttl' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => null)));
 			$stack->get(5);
 		}
 		
@@ -80,10 +80,10 @@
 			
 			$cache = $this->getMock('FakeCache', array('get', 'set'));
 			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(null));
-			$cache->expects($this->once())->method('set')->with('k:5', array("d" => "d", "e" => time() + 7), 7);
+			$cache->expects($this->once())->method('set')->with('k:5', json_encode(array("d" => "d", "e" => time() + 7)), 7);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'),
-				array(array('cache' => $cache, 'ttl' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serialize' => 'json')));
+				array(array('cache' => $cache, 'ttl' => 7, 'ttl_empty' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => 'json')));
 			$stack->get(5);
 		}
 		
@@ -97,7 +97,7 @@
 			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 15, 'd' => 'DATA')));
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
-				array(array('cache' => $cache, 'ttl' => 0, 'prefetchTime' => 10, 'prefetchProbability' => 1)));
+				array(array('cache' => $cache, 'ttl' => 0, 'ttl_empty' => 0, 'prefetchTime' => 10, 'prefetchProbability' => 1, 'serializationMethod' => null)));
 			$stack->get(5);
 		}
 		
@@ -112,7 +112,7 @@
 			$cache->expects($this->once())->method('set')->with('k:5', array('e' => time() + 60, 'd' => 'NEW DATA'), 60);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
-				array(array('cache' => $cache, 'ttl' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1)));
+				array(array('cache' => $cache, 'ttl' => 60, 'ttl_empty' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null)));
 			$this->assertSame('NEW DATA', $stack->get(5));
 		}
 		
@@ -132,8 +132,8 @@
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
-					array('cache' => $cache1, 'ttl' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1),
-					array('cache' => $cache2, 'ttl' => 30, 'prefetchTime' => 15, 'prefetchProbability' => 1)
+					array('cache' => $cache1, 'ttl' => 60, 'ttl_empty' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null),
+					array('cache' => $cache2, 'ttl' => 30, 'ttl_empty' => 30, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null)
 					));
 			
 			$this->assertSame('DATA 1', $stack->get(5));
@@ -155,8 +155,8 @@
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
-					array('cache' => $cache1, 'ttl' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1),
-					array('cache' => $cache2, 'ttl' => 30, 'prefetchTime' => 15, 'prefetchProbability' => 1)
+					array('cache' => $cache1, 'ttl' => 60, 'ttl_empty' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null),
+					array('cache' => $cache2, 'ttl' => 30, 'ttl_empty' => 30, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null)
 				));
 			
 			$this->assertSame('NEW DATA', $stack->get(5));
