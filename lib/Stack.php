@@ -116,7 +116,7 @@
 			{
 				$cache = $this->caches[$i];
 				
-				if ($data)
+				if ($data !== null)
 					$ttl = $cache['ttl'];
 				else
 					$ttl = $cache['ttl_empty'];
