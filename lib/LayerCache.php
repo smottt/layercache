@@ -129,6 +129,7 @@
 	
 	require_once LayerCache::path() . '/Stack.php';
 	require_once LayerCache::path() . '/Layer.php';
+	require_once LayerCache::path() . '/Trace.php';
 	require_once LayerCache::path() . '/ObjectMap.php';
 	require_once LayerCache::path() . '/StackBuilder.php';
 	

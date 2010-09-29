@@ -220,5 +220,26 @@
 			
 			$this->assertSame('NEW DATA', $stack->get(5));
 		}
+		
+		function testTrace()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->any())->method('get')->with(5)->will($this->returnValue('d'));
+			$source->expects($this->any())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('get', 'set'));
+			$cache->expects($this->any())->method('get')->with('k:5')->will($this->returnValue(null));
+			$cache->expects($this->any())->method('set')->with('k:5', array('d' => 'd', 'e' => time() + 7), 7);
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'),
+				array($this->createLayer($cache, 7, 7, 0, 1, null)));
+			
+			$stack->trace($x)->get(5);
+			$this->assertType("LayerCache_Trace", $x);
+			print_r($x);
+			
+			$stack->get(5);
+			print_r($x);
+		}
 	}
 	

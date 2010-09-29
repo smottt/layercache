@@ -51,6 +51,11 @@
 		protected $probabilityFactor = 1000000;
 		
 		/**
+		 * @var LayerCache_Trace
+		 */
+		protected $trace;
+		
+		/**
 		 * Creates a stack with callbacks and layers
 		 * 
 		 * @param callback $dataCallback Data retrieval callback method
@@ -71,6 +76,22 @@
 		}
 		
 		/**
+		 * Enables tracing for the next get
+		 * 
+		 * Example:
+		 * LayerCache::stack('Users')->trace($tr)->get(5);
+		 * print_r($tr);
+		 * 
+		 * @param $trace
+		 */
+		function trace(&$trace)
+		{
+			$trace = new LayerCache_Trace();
+			$this->trace = $trace;
+			return $this;
+		}
+		
+		/**
 		 * Returns a value for a specific key
 		 * 
 		 * Calls key normalization method first, then iterates over the caches and reads data. 
@@ -81,9 +102,19 @@
 		 */
 		function get($key = null)
 		{
+			$trace = $this->trace;
+			if ($trace)
+			{
+				$this->trace = null;
+				$trace->key = $key;
+			}
+			
 			$c = count($this->layers);
 			$emptyList = array();
 			$data = null;
+			
+			if ($trace)
+				$trace->cache_count = $c;
 			
 			if ($c > 0)
 			{
@@ -91,31 +122,75 @@
 				$nk = call_user_func($this->keyCallback, $key);
 				$r = mt_rand(1, $this->probabilityFactor);
 				
+				if ($trace)
+				{
+					$trace->time = $now;
+					$trace->flat_key = $nk;
+					$trace->rand = $r;
+				}
+				
 				/* @var $layer LayerCache_Layer */
 				foreach ($this->layers as $i => $layer)
 				{
+					$data = null;
 					$raw_entry = $layer->cache->get($nk);
 					$entry = $this->unserialize($raw_entry, $layer->serializationMethod);
 					
-					if (!$entry || 
-						!isset($entry['d']) || 
-						!isset($entry['e']) || 
-						!is_numeric($entry['e']) || 
-						($now >= $entry['e'] && $layer->ttl > 0) ||
-						($layer->prefetchTime > 0 && $layer->ttl > 0 && $now + $layer->prefetchTime >= $entry['e'] && $r <= $layer->prefetchProbability))
+					if ($trace)
+						$read = array('index' => $i, 
+							'class' => get_class($layer->cache), 
+							'unserialize' => $layer->serializationMethod, 
+							'data' => $raw_entry, 
+							'type' => null,
+							'prefetch_active' => $layer->prefetchTime > 0);
+					
+					if (!$entry)
 					{
-						$emptyList[] = $i;
+						if ($trace)
+							$read['result'] = 'null';
+					}
+					elseif (!is_array($entry) || !isset($entry['d']) || !isset($entry['e']) || !is_numeric($entry['e']))
+					{
+						if ($trace)
+							$read['result'] = 'invalid entry';
+					}
+					elseif ($now >= $entry['e'] && $layer->ttl > 0)
+					{
+						if ($trace)
+							$read['result'] = 'expired by ttl';
+					}
+					elseif ($layer->prefetchTime > 0 && $layer->ttl > 0 && $now + $layer->prefetchTime >= $entry['e'] && $r <= $layer->prefetchProbability)
+					{
+						if ($trace)
+							$read['result'] = 'expired by prefetch';
 					}
 					else
 					{
+						if ($trace)
+						{
+							$read['result'] = 'OK';
+							$read['type'] = gettype($entry['d']);
+							$read['data'] = $entry['d'];
+						}
 						$data = $entry['d'];
-						break;
 					}
+					
+					if ($trace)
+						$trace->reads[] = $read;
+					
+					if ($data)
+						break;
+					
+					$emptyList[] = $i;
 				}
 			}
 			
 			if ($data === null)
+			{
 				$data = call_user_func($this->dataCallback, $key);
+				if ($trace)
+					$trace->source = array('key' => $key, 'data' => $data);
+			}
 			
 			foreach ($emptyList as $i)
 			{
@@ -129,6 +204,9 @@
 				$entry = array('d' => $data, 'e' => $now + $ttl);
 				$raw_entry = $this->serialize($entry, $layer->serializationMethod);
 				$layer->cache->set($nk, $raw_entry, $ttl);
+				
+				if ($trace)
+					$trace->writes[] = array('index' => $i, 'ttl' => $ttl, 'data' => $raw_entry, 'serialize' => $layer->serializationMethod);
 			}
 			
 			return $data;
