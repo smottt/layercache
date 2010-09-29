@@ -1,6 +1,6 @@
 <?php
 	/**
-	Copyright 2009 Gasper Kozak
+	Copyright 2009, 2010 Gasper Kozak
 	
     This file is part of LayerCache.
 		
@@ -24,8 +24,19 @@
 	include_once dirname(__FILE__) . '/../lib/LayerCache.php';
 	include_once dirname(__FILE__) . '/mocks.php';
 	
-	class CacheStackTest extends PHPUnit_Framework_TestCase
+	class StackTest extends PHPUnit_Framework_TestCase
 	{
+		protected function createLayer($cache, $ttl, $ttl_empty, $prefetchTime, $prefetchProbability, $serializationMethod)
+		{
+			$layer = new LayerCache_Layer($cache);
+			$layer->ttl = $ttl;
+			$layer->ttl_empty = $ttl_empty;
+			$layer->prefetchTime = $prefetchTime;
+			$layer->prefetchProbability = $prefetchProbability;
+			$layer->serializationMethod = $serializationMethod;
+			return $layer;
+		}
+		
 		function testWithoutCache()
 		{
 			$source = $this->getMock('FakeSource', array('get'));
@@ -51,8 +62,8 @@
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
-					array('cache' => $cache1, 'ttl' => 7,  'ttl' => 7,  'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => null),
-					array('cache' => $cache2, 'ttl' => 15, 'ttl' => 15, 'prefetchTime' => 5, 'prefetchProbability' => 0.5, 'serializationMethod' => null)
+					$this->createLayer($cache1, 7, 7, 0, 1, null),
+					$this->createLayer($cache2, 15, 15, 5, 0.5, null)
 				));
 			$stack->set(5, 'DATA');
 		}
@@ -68,7 +79,22 @@
 			$cache->expects($this->once())->method('set')->with('k:5', array('d' => 'd', 'e' => time() + 7), 7);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'),
-				array(array('cache' => $cache, 'ttl' => 7, 'ttl' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => null)));
+				array($this->createLayer($cache, 7, 7, 0, 1, null)));
+			$stack->get(5);
+		}
+		
+		function testCacheTTL()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->once())->method('get')->with(5)->will($this->returnValue('d'));
+			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('get', 'set'));
+			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('d' => 'd', 'e' => time() - 1)));
+			$cache->expects($this->once())->method('set')->with('k:5', array('d' => 'd', 'e' => time() + 7), 7);
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'),
+				array($this->createLayer($cache, 7, 7, 0, 1, null)));
 			$stack->get(5);
 		}
 		
@@ -83,7 +109,7 @@
 			$cache->expects($this->once())->method('set')->with('k:5', json_encode(array("d" => "d", "e" => time() + 7)), 7);
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'),
-				array(array('cache' => $cache, 'ttl' => 7, 'ttl_empty' => 7, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => 'json')));
+				array($this->createLayer($cache, 7, 7, 0, 1, 'json')));
 			$stack->get(5);
 		}
 		
@@ -97,7 +123,7 @@
 			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 15, 'd' => 'DATA')));
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
-				array(array('cache' => $cache, 'ttl' => 0, 'ttl_empty' => 0, 'prefetchTime' => 10, 'prefetchProbability' => 1, 'serializationMethod' => null)));
+				array($this->createLayer($cache, 0, 0, 10, 1, null)));
 			$stack->get(5);
 		}
 		
@@ -111,9 +137,42 @@
 			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 10, 'd' => 'OLD DATA')));
 			$cache->expects($this->once())->method('set')->with('k:5', array('e' => time() + 60, 'd' => 'NEW DATA'), 60);
 			
-			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
-				array(array('cache' => $cache, 'ttl' => 60, 'ttl_empty' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null)));
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), array($this->createLayer($cache, 60, 60, 15, 1, null)));
 			$this->assertSame('NEW DATA', $stack->get(5));
+		}
+		
+		/**
+		 * @group bugs
+		 */
+		function testPrefetchShouldOnlyExecuteWhenNonZero()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->never())->method('get');
+			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('get', 'set'));
+			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time(), 'd' => 'OLD DATA')));
+			$cache->expects($this->never())->method('set');
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), array($this->createLayer($cache, 0, 0, 0, 1, null)));
+			$this->assertSame('OLD DATA', $stack->get(5));
+		}
+		
+		/**
+		 * @group bugs
+		 */
+		function testPrefetchShouldOnlyExecuteWhenTTLNonZero()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->never())->method('get');
+			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('get', 'set'));
+			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time(), 'd' => 'OLD DATA')));
+			$cache->expects($this->never())->method('set');
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), array($this->createLayer($cache, 0, 0, 5, 1, null)));
+			$this->assertSame('OLD DATA', $stack->get(5));
 		}
 		
 		function testOneCacheTimeouts()
@@ -132,9 +191,9 @@
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
-					array('cache' => $cache1, 'ttl' => 60, 'ttl_empty' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null),
-					array('cache' => $cache2, 'ttl' => 30, 'ttl_empty' => 30, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null)
-					));
+					$this->createLayer($cache1, 60, 60, 15, 1, null),
+					$this->createLayer($cache2, 30, 30, 15, 1, null)
+				));
 			
 			$this->assertSame('DATA 1', $stack->get(5));
 		}
@@ -155,8 +214,8 @@
 			
 			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
 				array(
-					array('cache' => $cache1, 'ttl' => 60, 'ttl_empty' => 60, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null),
-					array('cache' => $cache2, 'ttl' => 30, 'ttl_empty' => 30, 'prefetchTime' => 15, 'prefetchProbability' => 1, 'serializationMethod' => null)
+					$this->createLayer($cache1, 60, 60, 15, 1, null),
+					$this->createLayer($cache2, 30, 30, 15, 1, null)
 				));
 			
 			$this->assertSame('NEW DATA', $stack->get(5));

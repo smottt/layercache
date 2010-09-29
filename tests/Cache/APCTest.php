@@ -1,6 +1,6 @@
 <?php
 	/**
-	Copyright 2009 Gasper Kozak
+	Copyright 2009, 2010 Gasper Kozak
 	
     This file is part of LayerCache.
 		
@@ -35,20 +35,30 @@
 		
 		function testSetAndGet()
 		{
-			$cache = new LayerCache_Cache_APC();
-			$this->assertSame(null, $cache->get('test'));
+			$key = "test-simple-" . rand(100, 999);
 			
-			$cache->set('test', 'DATA', 1);
-			$this->assertSame('DATA', apc_fetch('test'));
-			$this->assertSame('DATA', $cache->get('test'));
+			$cache = new LayerCache_Cache_APC();
+			$this->assertSame(null, $cache->get($key));
+			
+			$data = 'SOME DATA';
+			
+			$cache->set($key, $data, 1);
+			$this->assertSame($data, apc_fetch($key));
+			$this->assertSame($data, $cache->get($key));
 		}
 		
 		function testSetAndGetComplexStructure()
 		{
+			$key = "test-complex-" . rand(100, 999);
+			
 			$cache = new LayerCache_Cache_APC();
-			$this->assertSame(null, $cache->get('test'));
-			$cache->set('test', array('x', array('a' => 12)), 10);
-			$this->assertEquals(array('x', array('a' => 12)), $cache->get('test'));
+			$this->assertSame(null, $cache->get($key));
+			
+			$data = array('x', array('a' => 12));
+			
+			$cache->set($key, $data, 10);
+			$this->assertEquals($data, $cache->get($key));
+			
 		}
 
 	}

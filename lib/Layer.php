@@ -17,29 +17,25 @@
     You should have received a copy of the GNU Lesser General Public License
     along with LayerCache.  If not, see <http://www.gnu.org/licenses/>.
 
-    @package Tests
+    @package LayerCache
 	**/
 	
-	require_once 'PHPUnit/Framework.php';
-	include_once dirname(__FILE__) . '/../lib/LayerCache.php';
-	
-	class ObjectMapTest extends PHPUnit_Framework_TestCase
+	/**
+	 * @package LayerCache
+	 * @author Gasper Kozak
+	 */
+	class LayerCache_Layer
 	{
-		/**
-		 * @expectedException RuntimeException
-		 */
-		function testNoStack()
-		{
-			$map = new LayerCache_ObjectMap;
-			$map->get('Inexistent');
-		}
+		public $cache;
+		public $ttl = 0;
+		public $ttl_empty = 0;
+		public $prefetchTime = 0;
+		public $prefetchProbability = 0;
+		public $serializationMethod = 'php';
 		
-		function testSetGet()
+		function __construct($cache)
 		{
-			$map = new LayerCache_ObjectMap;
-			$stack = new StdClass;
-			$map->set('MyStack', $stack);
-			$this->assertSame($stack, $map->get('MyStack'));
+			$this->cache = $cache;
 		}
 	}
 	

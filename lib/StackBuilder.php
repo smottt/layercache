@@ -1,6 +1,6 @@
 <?php
 	/**
-	Copyright 2009 Gasper Kozak
+	Copyright 2009, 2010 Gasper Kozak
 	
     This file is part of LayerCache.
 		
@@ -29,7 +29,7 @@
 		protected $map;
 		protected $dataSource;
 		protected $keySource;
-		protected $caches = array();
+		protected $layers = array();
 		
 		/**
 		 * Creates a builder with a cache map and source
@@ -49,6 +49,24 @@
 		}
 		
 		/**
+		 * 
+		 * Returns the currently added cache
+		 * @return LayerCache_Layer
+		 */
+		protected function currentLayer()
+		{
+			$c = count($this->layers);
+			if ($c == 0)
+				throw new RuntimeException("No cache is being added");
+			return $this->layers[$c - 1];
+		}
+		
+		protected function createLayer($cache)
+		{
+			return new LayerCache_Layer($cache);
+		}
+		
+		/**
 		 * Adds a cache to the stack specification
 		 * 
 		 * @param object $cache An arbitrary object that implements get($key) and set($key, $data, $ttl) methods
@@ -56,7 +74,7 @@
 		 */
 		function addCache($cache)
 		{
-			$this->caches[] = array('cache' => $cache, 'ttl' => 0, 'ttl_empty' => 0, 'prefetchTime' => 0, 'prefetchProbability' => 1, 'serializationMethod' => 'serialize');
+			$this->layers[] = $this->createLayer($cache);
 			return $this;
 		}
 		
@@ -76,8 +94,8 @@
 		 */
 		function withTTL($ttl, $ttl_empty = null)
 		{
-			$this->caches[count($this->caches) - 1]['ttl'] = $ttl;
-			$this->caches[count($this->caches) - 1]['ttl_empty'] = $ttl_empty === null ? $ttl : $ttl_empty;
+			$this->currentLayer()->ttl = $ttl;
+			$this->currentLayer()->ttl_empty = ($ttl_empty === null ? $ttl : $ttl_empty);
 			return $this;
 		}
 		
@@ -91,7 +109,7 @@
 		 */
 		function serializeWith($method)
 		{
-			$this->caches[count($this->caches) - 1]['serializationMethod'] = $method;
+			$this->currentLayer()->serializationMethod = $method;
 			return $this;
 		}
 		
@@ -104,8 +122,8 @@
 		 */
 		function withPrefetch($time, $probability)
 		{
-			$this->caches[count($this->caches) - 1]['prefetchTime'] = $time;
-			$this->caches[count($this->caches) - 1]['prefetchProbability'] = $probability;
+			$this->currentLayer()->prefetchTime = $time;
+			$this->currentLayer()->prefetchProbability = $probability;
 			return $this;
 		}
 		
@@ -117,7 +135,7 @@
 		 */
 		function toStack($name)
 		{
-			$stack = $this->stackFactory($this->dataSource, $this->keySource, $this->caches);
+			$stack = $this->createStack($this->dataSource, $this->keySource, $this->layers);
 			$this->map->set($name, $stack);
 			return $stack;
 		}
@@ -129,12 +147,12 @@
 		 * 
 		 * @param callback $dataSource
 		 * @param callback $keySource
-		 * @param array $stack
+		 * @param array $layers
 		 * @return LayerCache_Stack
 		 */
-		protected function stackFactory($dataSource, $keySource, $stack)
+		protected function createStack($dataSource, $keySource, $layers)
 		{
-			return new LayerCache_Stack($dataSource, $keySource, $stack);
+			return new LayerCache_Stack($dataSource, $keySource, $layers);
 		}
 	}
 	

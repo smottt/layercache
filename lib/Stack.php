@@ -1,6 +1,6 @@
 <?php
 	/**
-	Copyright 2009 Gasper Kozak
+	Copyright 2009, 2010 Gasper Kozak
 	
     This file is part of LayerCache.
 		
@@ -39,10 +39,10 @@
 		protected $keyCallback;
 		
 		/**
-		 * An array of caches
+		 * An array of caches with meta data
 		 * @var array
 		 */
-		protected $caches = array();
+		protected $layers = array();
 		
 		/**
 		 * Probability factor for prefetch
@@ -51,22 +51,22 @@
 		protected $probabilityFactor = 1000000;
 		
 		/**
-		 * Creates a stack with callbacks and caches
+		 * Creates a stack with callbacks and layers
 		 * 
 		 * @param callback $dataCallback Data retrieval callback method
 		 * @param callback $keyCallback Key normalization callback method
-		 * @param array $caches An array of caches
+		 * @param array $layers An array of caches with meta data
 		 */
-		function __construct($dataCallback, $keyCallback, array $caches = array())
+		function __construct($dataCallback, $keyCallback, array $layers = array())
 		{
 			$this->dataCallback = $dataCallback;
 			$this->keyCallback = $keyCallback;
 			
-			$c = count($caches);
+			$c = count($layers);
 			for ($i = $c - 1; $i >= 0; $i--)
 			{
-				$caches[$i]['prefetchProbability'] = round($caches[$i]['prefetchProbability'] * $this->probabilityFactor);
-				$this->caches[] = $caches[$i];
+				$layers[$i]->prefetchProbability = round($layers[$i]->prefetchProbability * $this->probabilityFactor);
+				$this->layers[] = $layers[$i];
 			}
 		}
 		
@@ -81,7 +81,7 @@
 		 */
 		function get($key = null)
 		{
-			$c = count($this->caches);
+			$c = count($this->layers);
 			$emptyList = array();
 			$data = null;
 			
@@ -91,13 +91,18 @@
 				$nk = call_user_func($this->keyCallback, $key);
 				$r = mt_rand(1, $this->probabilityFactor);
 				
-				foreach ($this->caches as $i => $cache)
+				/* @var $layer LayerCache_Layer */
+				foreach ($this->layers as $i => $layer)
 				{
-					$raw_entry = $cache['cache']->get($nk);
-					$entry = $this->unserialize($raw_entry, $cache['serializationMethod']);
-					if (!$entry || !isset($entry['d']) || !isset($entry['e']) || !is_numeric($entry['e']) || 
-						($now >= $entry['e'] && $cache['ttl'] > 0) ||
-						($now + $cache['prefetchTime'] >= $entry['e'] && $r <= $cache['prefetchProbability']))
+					$raw_entry = $layer->cache->get($nk);
+					$entry = $this->unserialize($raw_entry, $layer->serializationMethod);
+					
+					if (!$entry || 
+						!isset($entry['d']) || 
+						!isset($entry['e']) || 
+						!is_numeric($entry['e']) || 
+						($now >= $entry['e'] && $layer->ttl > 0) ||
+						($layer->prefetchTime > 0 && $layer->ttl > 0 && $now + $layer->prefetchTime >= $entry['e'] && $r <= $layer->prefetchProbability))
 					{
 						$emptyList[] = $i;
 					}
@@ -114,23 +119,23 @@
 			
 			foreach ($emptyList as $i)
 			{
-				$cache = $this->caches[$i];
+				$layer = $this->layers[$i];
 				
 				if ($data !== null)
-					$ttl = $cache['ttl'];
+					$ttl = $layer->ttl;
 				else
-					$ttl = $cache['ttl_empty'];
+					$ttl = $layer->ttl_empty;
 				
 				$entry = array('d' => $data, 'e' => $now + $ttl);
-				$raw_entry = $this->serialize($entry, $cache['serializationMethod']);
-				$cache['cache']->set($nk, $raw_entry, $ttl);
+				$raw_entry = $this->serialize($entry, $layer->serializationMethod);
+				$layer->cache->set($nk, $raw_entry, $ttl);
 			}
 			
 			return $data;
 		}
 		
 		/**
-		 * Sets data in all caches
+		 * Sets data in all layers
 		 * 
 		 * @param mixed $key Custom key
 		 * @param mixed $data
@@ -139,16 +144,16 @@
 		{
 			$now = time();
 			$nk = call_user_func($this->keyCallback, $key);
-			foreach ($this->caches as $cache)
+			foreach ($this->layers as $layer)
 			{
-				$entry = array('d' => $data, 'e' => $now + $cache['ttl']);
-				$cache['cache']->set($nk, $entry, $cache['ttl']);
+				$entry = array('d' => $data, 'e' => $now + $layer->ttl);
+				$layer->cache->set($nk, $entry, $layer->ttl);
 			}
 		}
 		
 		protected function serialize($data, $method)
 		{
-			if ($method == 'serialize')
+			if ($method == 'php')
 				return serialize($data);
 			elseif ($method == 'json')
 				return json_encode($data);
@@ -158,7 +163,7 @@
 		
 		protected function unserialize($data, $method)
 		{
-			if ($method == 'serialize')
+			if ($method == 'php')
 				return unserialize($data);
 			elseif ($method == 'json')
 				return json_decode($data, true);

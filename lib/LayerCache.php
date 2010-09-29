@@ -1,6 +1,6 @@
 <?php
 	/**
-	Copyright 2009 Gasper Kozak
+	Copyright 2009, 2010 Gasper Kozak
 	
     This file is part of LayerCache.
 		
@@ -128,6 +128,7 @@
 	}
 	
 	require_once LayerCache::path() . '/Stack.php';
+	require_once LayerCache::path() . '/Layer.php';
 	require_once LayerCache::path() . '/ObjectMap.php';
 	require_once LayerCache::path() . '/StackBuilder.php';
 	
