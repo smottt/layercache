@@ -30,6 +30,7 @@
 		protected $dataSource;
 		protected $keySource;
 		protected $layers = array();
+		protected $currentLayer = null;
 		
 		/**
 		 * Creates a builder with a cache map and source
@@ -55,12 +56,17 @@
 		 */
 		protected function currentLayer()
 		{
-			$c = count($this->layers);
-			if ($c == 0)
+			if ($this->currentLayer === null)
 				throw new RuntimeException("No cache is being added");
-			return $this->layers[$c - 1];
+			return $this->currentLayer;
 		}
 		
+		/**
+		 * Layer factory
+		 * 
+		 * @param object $cache
+		 * @return LayerCache_Layer
+		 */
 		protected function createLayer($cache)
 		{
 			return new LayerCache_Layer($cache);
@@ -74,7 +80,8 @@
 		 */
 		function addCache($cache)
 		{
-			$this->layers[] = $this->createLayer($cache);
+			$this->currentLayer = $this->createLayer($cache);
+			$this->layers[] = $this->currentLayer;
 			return $this;
 		}
 		
@@ -102,9 +109,9 @@
 		/**
 		 * Specifies the serialization method
 		 * 
-		 * Pass NULL if you wish to use cache-specific serialization (usually serialize).
+		 * Pass NULL if you wish to use cache-specific serialization.
 		 * 
-		 * @param mixed 'json', 'serialize', or null
+		 * @param mixed 'json' (json_encode/json_decode), 'php' (serialize/unserialize), or null
 		 * @return LayerCache_StackBuilder $this
 		 */
 		function serializeWith($method)
