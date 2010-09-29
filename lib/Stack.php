@@ -107,14 +107,12 @@
 			{
 				$this->trace = null;
 				$trace->key = $key;
+				$trace->cache_count = count($this->layers);
 			}
 			
 			$c = count($this->layers);
 			$emptyList = array();
 			$data = null;
-			
-			if ($trace)
-				$trace->cache_count = $c;
 			
 			if ($c > 0)
 			{
@@ -142,7 +140,8 @@
 							'unserialize' => $layer->serializationMethod, 
 							'data' => $raw_entry, 
 							'type' => null,
-							'prefetch_active' => $layer->prefetchTime > 0);
+							'prefetch_active' => $layer->prefetchTime > 0
+						);
 					
 					if (!$entry)
 					{
@@ -154,7 +153,7 @@
 						if ($trace)
 							$read['result'] = 'invalid entry';
 					}
-					elseif ($now >= $entry['e'] && $layer->ttl > 0)
+					elseif ($layer->ttl > 0 && $now >= $entry['e'])
 					{
 						if ($trace)
 							$read['result'] = 'expired by ttl';
@@ -206,7 +205,12 @@
 				$layer->cache->set($nk, $raw_entry, $ttl);
 				
 				if ($trace)
-					$trace->writes[] = array('index' => $i, 'ttl' => $ttl, 'data' => $raw_entry, 'serialize' => $layer->serializationMethod);
+					$trace->writes[] = array(
+						'index' => $i, 
+						'class' => get_class($layer->cache), 
+						'ttl' => $ttl, 
+						'data' => $raw_entry, 
+						'serialize' => $layer->serializationMethod);
 			}
 			
 			return $data;
