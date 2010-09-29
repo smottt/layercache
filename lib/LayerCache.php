@@ -26,7 +26,14 @@
 	 */
 	class LayerCache
 	{
+		/**
+		 * @var LayerCache_ObjectMap
+		 */
 		protected static $stackMap;
+		
+		/**
+		 * @var LayerCache_ObjectMap
+		 */
 		protected static $cacheMap;
 		
 		/**
@@ -64,28 +71,25 @@
 		/**
 		 * Returns a stack builder object for further specification
 		 * 
-		 * @param mixed $dataSource
-		 * @param mixed $keySource
+		 * @param mixed $dataProvider
+		 * @param mixed $keyMapper
 		 * @return LayerCache_StackBuilder
 		 */
-		static function forSource($dataSource, $keySource = null)
+		static function forSource($dataProvider, $keyMapper = null)
 		{
 			if (self::$stackMap === null)
 				self::$stackMap = new LayerCache_ObjectMap();
 			
-			if (is_object($dataSource))
-				$read_func = array($dataSource, 'get');
-			else
-				$read_func = $dataSource;
+			if (self::$cacheMap === null)
+				self::$cacheMap = new LayerCache_ObjectMap();
 			
-			if ($keySource === null && is_object($dataSource))
-				$key_func = array($dataSource, 'normalizeKey');
-			elseif ($keySource === null && is_array($dataSource))
-				$key_func = array($dataSource[0], 'normalizeKey');
-			else
-				$key_func = $keySource;
+			if (!is_callable($dataProvider))
+				throw new LayerCache_Exception("Data provider must be a callable method or function.");
 			
-			return new LayerCache_StackBuilder(self::$stackMap, $read_func, $key_func);
+			if ($keyMapper !== null && !is_callable($keyMapper))
+				throw new LayerCache_Exception("Key mapper must be a callable method or function.");
+			
+			return new LayerCache_StackBuilder(self::$stackMap, self::$cacheMap, $dataProvider, $keyMapper);
 		}
 		
 		/**
@@ -113,12 +117,12 @@
 		}
 		
 		/**
-		 * Adds a named cache for using with addCache
+		 * Adds a named cache for using with addLayer
 		 *
 		 * @param string $name
 		 * @param object $cache
 		 */
-		static function addNamedCache($name, $cache)
+		static function registerCache($name, $cache)
 		{
 			if (self::$cacheMap === null)
 				self::$cacheMap = new LayerCache_ObjectMap();
@@ -130,6 +134,7 @@
 	require_once LayerCache::path() . '/Stack.php';
 	require_once LayerCache::path() . '/Layer.php';
 	require_once LayerCache::path() . '/Trace.php';
+	require_once LayerCache::path() . '/Exception.php';
 	require_once LayerCache::path() . '/ObjectMap.php';
 	require_once LayerCache::path() . '/StackBuilder.php';
 	

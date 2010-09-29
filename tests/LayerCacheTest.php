@@ -22,6 +22,7 @@
 	
 	require_once 'PHPUnit/Framework.php';
 	include_once dirname(__FILE__) . '/../lib/LayerCache.php';
+	include_once dirname(__FILE__) . '/mocks.php';
 	
 	class LayerCacheTest extends PHPUnit_Framework_TestCase
 	{
@@ -32,15 +33,15 @@
 		
 		function testForSourceReturnsStackBuilder()
 		{
-			$source = new StdClass;
-			$b = LayerCache::forSource($source);
+			$source = new FakeSource;
+			$b = LayerCache::forSource(array($source, 'get'));
 			$this->assertType('LayerCache_StackBuilder', $b);
 		}
 		
 		function testStack()
 		{
-			$source = new StdClass;
-			$stack = LayerCache::forSource($source)->toStack('X');
+			$source = new FakeSource;
+			$stack = LayerCache::forSource(array($source, 'get'))->toStack('X');
 			$this->assertSame($stack, LayerCache::stack('X'));
 		}
 		
@@ -56,28 +57,24 @@
 		
 		function testHasStack()
 		{
-			LayerCache::forSource(new StdClass)->toStack('X');
+			LayerCache::forSource(array(new FakeSource, 'get'))->toStack('X');
 			$this->assertTrue(LayerCache::hasStack('X'));
 			$this->assertFalse(LayerCache::hasStack('Y'));
 		}
 		
-		function testAddNamedCache()
+		function testRegisterCache()
 		{
 			$c = new StdClass;
-			LayerCache::addNamedCache('mc', $c);
+			LayerCache::registerCache('mc', $c);
 		}
 		
 		/**
 		 * @expectedException RuntimeException
 		 */
-		function testAddNamedCacheSameNameThrowsUp()
+		function testRegisterCacheSameNameThrowsUp()
 		{
-			LayerCache::addNamedCache('mc', new StdClass);
-			LayerCache::addNamedCache('mc', new StdClass);
-		}
-		
-		function testCreateWithNamedCache()
-		{
+			LayerCache::registerCache('mc', new StdClass);
+			LayerCache::registerCache('mc', new StdClass);
 		}
 	}
 	

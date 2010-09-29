@@ -31,12 +31,14 @@
 			$source = new FakeSource;
 			$stack = $this->getMock('LayerCache_Stack', array(), array(array($source, 'get'), array($source, 'normalizeKey'), array()));
 			
-			$map = $this->getMock('LayerCache_ObjectMap');
-			$map->expects($this->once())->
+			$stack_map = $this->getMock('LayerCache_ObjectMap');
+			$stack_map->expects($this->once())->
 				method('set')->
 				with('fake', $stack);
 			
-			$pb = $this->getMock('LayerCache_StackBuilder', array('createStack'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
+			$cache_map = new LayerCache_ObjectMap;
+			
+			$pb = $this->getMock('LayerCache_StackBuilder', array('createStack'), array($stack_map, $cache_map, array($source, 'get'), array($source, 'normalizeKey')));
 			
 			$pb->expects($this->once())->
 				method('createStack')->
@@ -54,12 +56,13 @@
 			$cache = new FakeCache;
 			$layer = new LayerCache_Layer($cache);
 			
-			$map = $this->getMock('LayerCache_ObjectMap');
-			$map->expects($this->once())->
+			$stack_map = $this->getMock('LayerCache_ObjectMap');
+			$stack_map->expects($this->once())->
 				method('set')->
 				with('fake', $stack);
 			
-			$pb = $this->getMock('LayerCache_StackBuilder', array('createLayer', 'createStack'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
+			$cache_map = new LayerCache_ObjectMap;
+			$pb = $this->getMock('LayerCache_StackBuilder', array('createLayer', 'createStack'), array($stack_map, $cache_map, array($source, 'get'), array($source, 'normalizeKey')));
 			
 			$pb->expects($this->once())->
 				method('createLayer')->
@@ -71,7 +74,7 @@
 				with(array($source, 'get'), array($source, 'normalizeKey'), array($layer))->
 				will($this->returnValue($stack));
 			
-			$p = $pb->addCache($cache)->serializeWith('json')->toStack('fake');
+			$p = $pb->addLayer($cache)->serializeWith('json')->toStack('fake');
 			$this->assertSame($p, $stack);
 		}
 		
@@ -82,12 +85,14 @@
 			$cache = new FakeCache;
 			$layer = new LayerCache_Layer($cache);
 			
-			$map = $this->getMock('LayerCache_ObjectMap');
-			$map->expects($this->once())->
+			$stack_map = $this->getMock('LayerCache_ObjectMap');
+			$stack_map->expects($this->once())->
 				method('set')->
 				with('fake', $stack);
 			
-			$pb = $this->getMock('LayerCache_StackBuilder', array('createLayer', 'createStack'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
+			$cache_map = new LayerCache_ObjectMap;
+			
+			$pb = $this->getMock('LayerCache_StackBuilder', array('createLayer', 'createStack'), array($stack_map, $cache_map, array($source, 'get'), array($source, 'normalizeKey')));
 			
 			$pb->expects($this->once())->
 				method('createLayer')->
@@ -99,7 +104,7 @@
 				with(array($source, 'get'), array($source, 'normalizeKey'), array($layer))->
 				will($this->returnValue($stack));
 			
-			$p = $pb->addCache($cache)->withTTL(120)->withPrefetch(20, 0.1)->toStack('fake');
+			$p = $pb->addLayer($cache)->withTTL(120)->withPrefetch(20, 0.1)->toStack('fake');
 			$this->assertSame($p, $stack);
 		}
 		
@@ -112,12 +117,14 @@
 			$cache2 = new FakeCache;
 			$layer2 = new LayerCache_Layer($cache2);
 			
-			$map = $this->getMock('LayerCache_ObjectMap');
-			$map->expects($this->once())->
+			$stack_map = $this->getMock('LayerCache_ObjectMap');
+			$stack_map->expects($this->once())->
 				method('set')->
 				with('fake', $stack);
 			
-			$pb = $this->getMock('LayerCache_StackBuilder', array('createLayer', 'createStack'), array($map, array($source, 'get'), array($source, 'normalizeKey')));
+			$cache_map = new LayerCache_ObjectMap;
+			
+			$pb = $this->getMock('LayerCache_StackBuilder', array('createLayer', 'createStack'), array($stack_map, $cache_map, array($source, 'get'), array($source, 'normalizeKey')));
 			
 			$pb->expects($this->at(0))->
 				method('createLayer')->
@@ -135,10 +142,25 @@
 				will($this->returnValue($stack));
 			
 			$p = $pb->
-				addCache($cache1)->withPrefetch(20, 0.1)->
-				addCache($cache2)->withTTL(360, 15)->toStack('fake');
+				addLayer($cache1)->withPrefetch(20, 0.1)->
+				addLayer($cache2)->withTTL(360, 15)->toStack('fake');
 			
 			$this->assertSame($p, $stack);
+		}
+		
+		function testAddLayerWithNamedCache()
+		{
+			$cache = $this->getMock('FakeCache', array('get'));
+			$cache->expects($this->once())->method('get')->with('kee')->will($this->returnValue(serialize(array('d' => 'DATA', 'e' => time() + 10))));
+			
+			LayerCache::registerCache('cache1', $cache);
+			LayerCache::forSource(array(new FakeSource, 'get'))->
+				addLayer('cache1')->
+				toStack('named');
+			
+			$stack = LayerCache::stack('named');
+			$v = $stack->get('kee');
+			$this->assertSame('DATA', $v);
 		}
 	}
 	

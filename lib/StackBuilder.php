@@ -26,10 +26,34 @@
 	 */
 	class LayerCache_StackBuilder
 	{
-		protected $map;
+		/**
+		 * @var LayerCache_ObjectMap
+		 */
+		protected $cacheMap;
+		
+		/**
+		 * @var LayerCache_ObjectMap
+		 */
+		protected $stackMap;
+		
+		/**
+		 * @var callback
+		 */
 		protected $dataSource;
+		
+		/**
+		 * @var callback
+		 */
 		protected $keySource;
+		
+		/**
+		 * @var array
+		 */
 		protected $layers = array();
+		
+		/**
+		 * @var LayerCache_Layer
+		 */
 		protected $currentLayer = null;
 		
 		/**
@@ -38,13 +62,15 @@
 		 * When the method toStack() is called, 
 		 * StackBuilder writes an instance of LayerCache_Stack to the $map.
 		 * 
-		 * @param LayerCache_StackMap $map
+		 * @param LayerCache_ObjectMap $stackMap
+		 * @param LayerCache_ObjectMap $cacheMap
 		 * @param callback $dataSource
 		 * @param callback $keySource
 		 */
-		function __construct(LayerCache_ObjectMap $map, $dataSource, $keySource)
+		function __construct(LayerCache_ObjectMap $stackMap, LayerCache_ObjectMap $cacheMap, $dataSource, $keySource)
 		{
-			$this->map = $map;
+			$this->stackMap = $stackMap;
+			$this->cacheMap = $cacheMap;
 			$this->dataSource = $dataSource;
 			$this->keySource = $keySource;
 		}
@@ -75,12 +101,24 @@
 		/**
 		 * Adds a cache to the stack specification
 		 * 
-		 * @param object $cache An arbitrary object that implements get($key) and set($key, $data, $ttl) methods
+		 * @param mixed $cache An arbitrary object that implements get($key) and set($key, $data, $ttl) methods, or a named cache (see LayerCache::registerCache())
 		 * @return LayerCache_StackBuilder $this
 		 */
-		function addCache($cache)
+		function addLayer($cache)
 		{
-			$this->currentLayer = $this->createLayer($cache);
+			if (is_object($cache))
+				$obj = $cache;
+			elseif (is_string($cache))
+			{
+				if ($this->cacheMap->has($cache))
+					$obj = $this->cacheMap->get($cache);
+				else
+					throw new LayerCache_Exception("No named cache found: '{$cache}'");
+			}
+			else
+				throw new LayerCache_Exception("Cache should be an object or a string");
+			
+			$this->currentLayer = $this->createLayer($obj);
 			$this->layers[] = $this->currentLayer;
 			return $this;
 		}
@@ -143,7 +181,7 @@
 		function toStack($name)
 		{
 			$stack = $this->createStack($this->dataSource, $this->keySource, $this->layers);
-			$this->map->set($name, $stack);
+			$this->stackMap->set($name, $stack);
 			return $stack;
 		}
 		

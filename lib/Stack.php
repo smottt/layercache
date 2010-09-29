@@ -30,13 +30,13 @@
 		 * Data retrieval callback method
 		 * @var callback
 		 */
-		protected $dataCallback;
+		protected $dataProvider;
 		
 		/**
 		 * Key normalization callback
 		 * @var callback
 		 */
-		protected $keyCallback;
+		protected $keyMapper;
 		
 		/**
 		 * An array of caches with meta data
@@ -58,14 +58,14 @@
 		/**
 		 * Creates a stack with callbacks and layers
 		 * 
-		 * @param callback $dataCallback Data retrieval callback method
-		 * @param callback $keyCallback Key normalization callback method
+		 * @param callback $dataProvider Data retrieval callback method
+		 * @param callback $keyMapper Key normalization callback method
 		 * @param array $layers An array of caches with meta data
 		 */
-		function __construct($dataCallback, $keyCallback, array $layers = array())
+		function __construct($dataProvider, $keyMapper, array $layers = array())
 		{
-			$this->dataCallback = $dataCallback;
-			$this->keyCallback = $keyCallback;
+			$this->dataProvider = $dataProvider;
+			$this->keyMapper = $keyMapper;
 			
 			$c = count($layers);
 			for ($i = $c - 1; $i >= 0; $i--)
@@ -117,7 +117,12 @@
 			if ($c > 0)
 			{
 				$now = time();
-				$nk = call_user_func($this->keyCallback, $key);
+				
+				if ($this->keyMapper)
+					$nk = call_user_func($this->keyMapper, $key);
+				else
+					$nk = $key;
+				
 				$r = mt_rand(1, $this->probabilityFactor);
 				
 				if ($trace)
@@ -146,7 +151,10 @@
 					if (!$entry)
 					{
 						if ($trace)
-							$read['result'] = 'null';
+							if (strlen($raw_entry) > 0)
+								$read['result'] = 'format mismatch';
+							else
+								$read['result'] = 'null';
 					}
 					elseif (!is_array($entry) || !isset($entry['d']) || !isset($entry['e']) || !is_numeric($entry['e']))
 					{
@@ -186,7 +194,7 @@
 			
 			if ($data === null)
 			{
-				$data = call_user_func($this->dataCallback, $key);
+				$data = call_user_func($this->dataProvider, $key);
 				if ($trace)
 					$trace->source = array('key' => $key, 'data' => $data);
 			}
@@ -225,7 +233,7 @@
 		function set($key, $data)
 		{
 			$now = time();
-			$nk = call_user_func($this->keyCallback, $key);
+			$nk = call_user_func($this->keyMapper, $key);
 			foreach ($this->layers as $layer)
 			{
 				$entry = array('d' => $data, 'e' => $now + $layer->ttl);
