@@ -221,6 +221,52 @@
 			$this->assertSame('NEW DATA', $stack->get(5));
 		}
 		
+		function testSetAllCaches()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->never())->method('get');
+			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache1 = $this->getMock('FakeCache', array('get', 'set'));
+			$cache1->expects($this->never())->method('get');
+			$cache1->expects($this->once())->method('set')->with('k:5', serialize(array('d' => 'Data', 'e' => time() + 60)), 60);
+			
+			$cache2 = $this->getMock('FakeCache');
+			$cache2->expects($this->never())->method('get');
+			$cache2->expects($this->once())->method('set')->with('k:5', serialize(array('d' => 'Data', 'e' => time() + 30)), 30);
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), 
+				array(
+					$this->createLayer($cache1, 60, 60, 0, 1, 'php'),
+					$this->createLayer($cache2, 30, 30, 0, 1, 'php')
+				));
+			
+			$stack->set(5, 'Data');
+		}
+		
+		function testSetAllCachesNoKeyCallback()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->never())->method('get');
+			$source->expects($this->never())->method('normalizeKey');
+			
+			$cache1 = $this->getMock('FakeCache', array('get', 'set'));
+			$cache1->expects($this->never())->method('get');
+			$cache1->expects($this->once())->method('set')->with('Kee', array('e' => time() + 60, 'd' => 'Data'), 60);
+			
+			$cache2 = $this->getMock('FakeCache');
+			$cache2->expects($this->never())->method('get');
+			$cache2->expects($this->once())->method('set')->with('Kee', array('e' => time() + 30, 'd' => 'Data'), 30);
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), null,
+				array(
+					$this->createLayer($cache1, 60, 60, 0, 1, null),
+					$this->createLayer($cache2, 30, 30, 0, 1, null)
+				));
+			
+			$stack->set('Kee', 'Data');
+		}
+		
 		function testTrace()
 		{
 			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));

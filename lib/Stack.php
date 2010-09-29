@@ -233,10 +233,15 @@
 		function set($key, $data)
 		{
 			$now = time();
-			$nk = call_user_func($this->keyMapper, $key);
+			
+			if ($this->keyMapper)
+				$nk = call_user_func($this->keyMapper, $key);
+			else
+				$nk = $key;
+			
 			foreach ($this->layers as $layer)
 			{
-				$entry = array('d' => $data, 'e' => $now + $layer->ttl);
+				$entry = $this->serialize(array('d' => $data, 'e' => $now + $layer->ttl), $layer->serializationMethod);
 				$layer->cache->set($nk, $entry, $layer->ttl);
 			}
 		}
