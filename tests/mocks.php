@@ -29,6 +29,10 @@
 		function normalizeKey($key)
 		{
 		}
+		
+		function ttl($value)
+		{
+		}
 	}
 	
 	class FakeCache
