@@ -127,7 +127,7 @@
 			if (self::$cacheMap === null)
 				self::$cacheMap = new LayerCache_ObjectMap();
 			
-			self::$cacheMap->set(strtolower($name), $cache);
+			self::$cacheMap->set($name, $cache);
 		}
 	}
 	
