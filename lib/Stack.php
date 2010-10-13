@@ -250,6 +250,12 @@
 			}
 		}
 		
+		/**
+		 * Internal serialization mapper
+		 * 
+		 * @param mixed $data
+		 * @param string $method php, json, null
+		 */
 		protected function serialize($data, $method)
 		{
 			if ($method == 'php')
@@ -260,6 +266,12 @@
 				return $data;
 		}
 		
+		/**
+		 * Internal unserialization mapper
+		 * 
+		 * @param mixed $data
+		 * @param string $method php, json, null
+		 */
 		protected function unserialize($data, $method)
 		{
 			if ($method == 'php')
@@ -271,5 +283,4 @@
 		}
 		
 	}
-
 	
