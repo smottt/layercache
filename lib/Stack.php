@@ -145,7 +145,11 @@
 							'unserialize' => $layer->serializationMethod, 
 							'data' => $raw_entry, 
 							'type' => null,
-							'prefetch_active' => $layer->prefetchTime > 0
+							'prefetch' => array(
+								'active' => $layer->prefetchTime > 0,
+								'time' => $layer->prefetchTime,
+								'probability' => $layer->prefetchProbability / $this->probabilityFactor
+							)
 						);
 					
 					if (!$entry)
