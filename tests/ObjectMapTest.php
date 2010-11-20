@@ -20,7 +20,6 @@
     @package Tests
 	**/
 	
-	require_once 'PHPUnit/Framework.php';
 	include_once dirname(__FILE__) . '/../lib/LayerCache.php';
 	
 	class ObjectMapTest extends PHPUnit_Framework_TestCase

@@ -20,7 +20,6 @@
     @package Tests
 	**/
 	
-	require_once 'PHPUnit/Framework.php';
 	include_once dirname(__FILE__) . '/../lib/LayerCache.php';
 	include_once dirname(__FILE__) . '/mocks.php';
 	
