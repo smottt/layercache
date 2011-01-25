@@ -136,6 +136,7 @@
 				foreach ($this->layers as $i => $layer)
 				{
 					$data = null;
+					$retrieved = false;
 					$raw_entry = $layer->cache->get($nk);
 					$entry = $this->unserialize($raw_entry, $layer->serializationMethod);
 					
@@ -184,12 +185,13 @@
 							$read['data'] = $entry['d'];
 						}
 						$data = $entry['d'];
+						$retrieved =  true;
 					}
 					
 					if ($trace)
 						$trace->reads[] = $read;
 					
-					if ($data === null)
+					if ($retrieved)
 						break;
 					
 					$emptyList[] = $i;
