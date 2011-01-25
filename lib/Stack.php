@@ -185,7 +185,7 @@
 							$read['data'] = $entry['d'];
 						}
 						$data = $entry['d'];
-						$retrieved =  true;
+						$retrieved = true;
 					}
 					
 					if ($trace)
