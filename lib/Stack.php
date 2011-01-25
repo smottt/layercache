@@ -189,7 +189,7 @@
 					if ($trace)
 						$trace->reads[] = $read;
 					
-					if ($data)
+					if ($data === null)
 						break;
 					
 					$emptyList[] = $i;
