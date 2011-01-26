@@ -266,6 +266,9 @@
 			$stack->set('Kee', 'Data');
 		}
 		
+		/**
+		 * @group trace
+		 */
 		function testTrace()
 		{
 			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
@@ -299,5 +302,116 @@
 			$this->assertSame(array(), $t->source);
 			$this->assertEquals(0, count($t->writes));
 		}
+		
+		/**
+		 * @group trace
+		 */
+		function testTraceWorksOnlyOnce()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->at(0))->method('normalizeKey')->with(5)->will($this->returnValue('key:5'));
+			$source->expects($this->at(1))->method('get')->with(5)->will($this->returnValue('DATA=5'));
+			$source->expects($this->at(2))->method('normalizeKey')->with(7)->will($this->returnValue('key:7'));
+			$source->expects($this->at(3))->method('get')->with(7)->will($this->returnValue('DATA=7'));
+			
+			$cache = new LayerCache_Cache_Local();
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'),
+				array($this->createLayer($cache, 7, 7, 0, 1, null)));
+			
+			// with trace
+			$stack->trace($t)->get(5);
+			$this->assertType("LayerCache_Trace", $t);
+			$this->assertType("int", $t->time);
+			$this->assertSame(5, $t->key);
+			$this->assertSame("key:5", $t->flat_key);
+			$this->assertSame(1, $t->cache_count);
+			$this->assertType("int", $t->rand);
+			$this->assertEquals(1, count($t->reads));
+			$this->assertSame(array('key' => 5, 'data' => 'DATA=5'), $t->source);
+			$this->assertEquals(1, count($t->writes));
+			
+			// without trace ($t keeps previous trace info)
+			$stack->get(7);
+			$this->assertType("LayerCache_Trace", $t);
+			$this->assertType("int", $t->time);
+			$this->assertSame(5, $t->key);
+			$this->assertSame("key:5", $t->flat_key);
+			$this->assertSame(1, $t->cache_count);
+			$this->assertType("int", $t->rand);
+			$this->assertEquals(1, count($t->reads));
+			$this->assertSame(array('key' => 5, 'data' => 'DATA=5'), $t->source);
+			$this->assertEquals(1, count($t->writes));
+		}
+		
+		/**
+		 * @group bugs
+		 */
+		function testEmptyArrayCanBeStoredAsValidData()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->never())->method('get');
+			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('get', 'set'));
+			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 5, 'd' => array())));
+			$cache->expects($this->never())->method('set');
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), array($this->createLayer($cache, 10, 10, 0, 1, null)));
+			$this->assertSame(array(), $stack->get(5));
+		}
+		
+		/**
+		 * @group bugs
+		 */
+		function testZeroCanBeStoredAsValidData()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->never())->method('get');
+			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('get', 'set'));
+			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 5, 'd' => 0)));
+			$cache->expects($this->never())->method('set');
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), array($this->createLayer($cache, 10, 10, 0, 1, null)));
+			$this->assertSame(0, $stack->get(5));
+		}
+		
+		/**
+		 * @group bugs
+		 */
+		function testFalseCanBeStoredAsValidData()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->never())->method('get');
+			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('get', 'set'));
+			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 5, 'd' => false)));
+			$cache->expects($this->never())->method('set');
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), array($this->createLayer($cache, 10, 10, 0, 1, null)));
+			$this->assertSame(false, $stack->get(5));
+		}
+		
+		
+		/**
+		 * @group bugs
+		 */
+		function testNullCanBeStoredAsValidData()
+		{
+			$source = $this->getMock('FakeSource', array('get', 'normalizeKey'));
+			$source->expects($this->never())->method('get');
+			$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+			
+			$cache = $this->getMock('FakeCache', array('get', 'set'));
+			$cache->expects($this->once())->method('get')->with('k:5')->will($this->returnValue(array('e' => time() + 5, 'd' => null)));
+			$cache->expects($this->never())->method('set');
+			
+			$stack = new LayerCache_Stack(array($source, 'get'), array($source, 'normalizeKey'), array($this->createLayer($cache, 10, 10, 0, 1, null)));
+			$this->assertSame(null, $stack->get(5));
+		}
+		
 	}
 	

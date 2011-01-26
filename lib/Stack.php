@@ -113,6 +113,7 @@
 			$c = count($this->layers);
 			$emptyList = array();
 			$data = null;
+			$retrieved = false;
 			
 			if ($c > 0)
 			{
@@ -135,8 +136,6 @@
 				/* @var $layer LayerCache_Layer */
 				foreach ($this->layers as $i => $layer)
 				{
-					$data = null;
-					$retrieved = false;
 					$raw_entry = $layer->cache->get($nk);
 					$entry = $this->unserialize($raw_entry, $layer->serializationMethod);
 					
@@ -161,7 +160,7 @@
 							else
 								$read['result'] = 'null';
 					}
-					elseif (!is_array($entry) || !isset($entry['d']) || !isset($entry['e']) || !is_numeric($entry['e']))
+					elseif (!is_array($entry) || !array_key_exists('d', $entry) || !isset($entry['e']) || !is_numeric($entry['e']))
 					{
 						if ($trace)
 							$read['result'] = 'invalid entry';
@@ -198,7 +197,7 @@
 				}
 			}
 			
-			if ($data === null)
+			if (!$retrieved)
 			{
 				$data = call_user_func($this->dataProvider, $key);
 				if ($trace)
@@ -209,7 +208,7 @@
 			{
 				$layer = $this->layers[$i];
 				
-				if ($data !== null)
+				if (!$data)
 					$ttl = $layer->ttl;
 				else
 					$ttl = $layer->ttl_empty;

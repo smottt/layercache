@@ -134,7 +134,7 @@
 		 * See also LayerCache_StackBuilder::withPrefetch().
 		 * 
 		 * @param int $ttl TTL for the item
-		 * @param int $ttl_empty TTL for the item if it's empty (null, false, emtpy string). If NULL, $ttl is used.
+		 * @param int $ttl_empty TTL for the item if it's empty (null, false, zero, empty string, empty array). If NULL, $ttl is used.
 		 * @return LayerCache_StackBuilder $this
 		 */
 		function withTTL($ttl, $ttl_empty = null)
