@@ -1,6 +1,6 @@
 <?php
 	/**
-	Copyright 2009, 2010 Gasper Kozak
+	Copyright 2009-2011 Gasper Kozak
 	
     This file is part of LayerCache.
 		
@@ -24,6 +24,9 @@
 	 * 
 	 * 
 	 * A php array LRU cache
+	 * 
+	 * @package LayerCache
+	 * @author Gasper Kozak
 	 *
 	 */
 	class LayerCache_Cache_Local
