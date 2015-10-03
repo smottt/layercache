@@ -1,0 +1,32 @@
+{
+	"name": "smottt/layercache",
+	"description": "LayerCache, a PHP multi-layer caching framework",
+	"version": "1.0.0-dev",
+	"type": "library",
+	"keywords": ["cache"],
+	"homepage": "https://github.com/smottt/layercache",
+	"license": "LGPL-3.0",
+	"authors": [
+	    {
+	        "name": "Gašper Kozak",
+	        "email": "gasper@kozak.si",
+	        "homepage": "http://www.kozak.si",
+	        "role": "Developer"
+	    },
+	    {
+	        "name": "Metod N",
+	        "email": "metod@simpel.si",
+	        "homepage": "http://www.metod.si",
+	        "role": "Developer"
+	    }
+	],
+	"require": {
+	    "php": ">=5.5"
+	},
+	"require-dev": {
+	    "phpunit/phpunit": "~4.8"
+	},
+	"config": {
+	    "bin-dir": "bin"
+	}
+}

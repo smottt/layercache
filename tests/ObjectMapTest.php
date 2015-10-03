@@ -1,9 +1,9 @@
 <?php
 	/**
 	Copyright 2009-2011 Gasper Kozak
-	
+
     This file is part of LayerCache.
-		
+
     LayerCache is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -19,10 +19,10 @@
 
     @package Tests
 	**/
-	
+
 	include_once dirname(__FILE__) . '/../lib/LayerCache.php';
-	
-	class ObjectMapTest extends PHPUnit_Framework_TestCase
+
+	class ObjectMapTest extends \PHPUnit_Framework_TestCase
 	{
 		/**
 		 * @expectedException RuntimeException
@@ -32,13 +32,12 @@
 			$map = new LayerCache_ObjectMap;
 			$map->get('Inexistent');
 		}
-		
+
 		function testSetGet()
 		{
 			$map = new LayerCache_ObjectMap;
-			$stack = new StdClass;
+			$stack = new \stdClass;
 			$map->set('MyStack', $stack);
 			$this->assertSame($stack, $map->get('MyStack'));
 		}
 	}
-	

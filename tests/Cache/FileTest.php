@@ -1,9 +1,9 @@
 <?php
 	/**
 	Copyright 2009-2011 Gasper Kozak
-	
+
     This file is part of LayerCache.
-		
+
     LayerCache is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -19,9 +19,9 @@
 
     @package Tests
 	**/
-	
+
 	include_once dirname(__FILE__) . '/../../lib/LayerCache.php';
-	
+
 	class FileTest extends PHPUnit_Framework_TestCase
 	{
 		function setUp()
@@ -32,29 +32,29 @@
 					unlink($file->getPathName());
 			$this->cache = new LayerCache_Cache_File($dir);
 		}
-		
+
 		function testGetEmpty()
 		{
 			$this->assertSame(null, $this->cache->get('test'));
 		}
-		
+
 		function testSetAndGet()
 		{
 			$this->assertSame(null, $this->cache->get('test'));
 			$this->cache->set('test', 'DATA', 10);
 			$this->assertSame('DATA', $this->cache->get('test'));
 		}
-		
+
 		function testSetAndGetComplexStructure()
 		{
 			$this->assertSame(null, $this->cache->get('test'));
-			$o = new StdClass;
+			$o = new stdClass;
 			$o->z = 34;
 			$data = array('x', $o, array('a' => 12));
 			$this->cache->set('test', serialize($data), 10);
 			$this->assertEquals($data, unserialize($this->cache->get('test')));
 		}
-		
+
 		function testTTL()
 		{
 			$this->assertSame(null, $this->cache->get('test'));
@@ -64,4 +64,4 @@
 			$this->assertSame(null, $this->cache->get('test'));
 		}
 	}
-	
+
