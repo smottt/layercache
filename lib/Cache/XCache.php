@@ -1,43 +1,59 @@
 <?php
+
+/**
+Copyright 2009-2015 Gasper Kozak
+
+This file is part of LayerCache.
+
+LayerCache is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+LayerCache is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with LayerCache.  If not, see <http://www.gnu.org/licenses/>.
+
+@package LayerCache
+**/
+
+namespace LayerCache\Cache;
+
+/**
+ * @package LayerCache
+ *
+ * @author Gasper Kozak
+ * @author Metod N <metod@simpel.si>
+ */
+class XCache implements Cache
+{
 	/**
-	Copyright 2009-2011 Gasper Kozak
-	
-    This file is part of LayerCache.
-		
-    LayerCache is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    LayerCache is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with LayerCache.  If not, see <http://www.gnu.org/licenses/>.
-
-    @package LayerCache
-	**/
-	
-	/**
-	 * @package LayerCache
-	 * @author Gasper Kozak
+	 * {@inheritDoc}
+	 *
+	 * @return mixed
 	 */
-	class LayerCache_Cache_XCache
+	public function get($key)
 	{
-		function get($key)
-		{
-			$v = xcache_get($key);
-			if ($v === false)
-				return null;
-			else
-				return $v;
+		$data = xcache_get($key);
+
+		if ($data === false) {
+			return null;
 		}
-		
-		function set($key, $data, $ttl)
-		{
-			xcache_set($key, $data, $ttl);
-		}
+
+		return $data;
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @return bool
+	 */
+	public function set($key, $data, $ttl)
+	{
+		return xcache_set($key, $data, $ttl);
+	}
+}

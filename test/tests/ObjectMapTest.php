@@ -18,44 +18,27 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with LayerCache.  If not, see <http://www.gnu.org/licenses/>.
 
-@package LayerCache
+@package Tests
 **/
 
-namespace LayerCache;
+use LayerCache\ObjectMap;
 
-/**
- * @package LayerCache
- *
- * @author Gasper Kozak
- * @author Metod N <metod@simpel.si>
- */
-class Layer
+class ObjectMapTest extends \PHPUnit_Framework_TestCase
 {
-	/** @var object */
-	public $cache;
-
-	/** @var int */
-	public $ttl = 0;
-
-	/** @var int */
-	public $ttl_empty = 0;
-
-	/** @var int */
-	public $prefetchTime = 0;
-
-	/** @var float */
-	public $prefetchProbability = 0;
-
-	/** @var string */
-	public $serializationMethod = 'php';
-
 	/**
-	 * Construct a new cache layer object.
-	 *
-	 * @param object $cache
+	 * @expectedException \RuntimeException
 	 */
-	public function __construct($cache)
+	public function testNoStack()
 	{
-		$this->cache = $cache;
+		$map = new ObjectMap;
+		$map->get('Inexistent');
+	}
+
+	public function testSetGet()
+	{
+		$map   = new ObjectMap;
+		$stack = new \stdClass;
+		$map->set('MyStack', $stack);
+		$this->assertSame($stack, $map->get('MyStack'));
 	}
 }

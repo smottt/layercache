@@ -10,6 +10,7 @@
     processIsolation            = "false"
     stopOnFailure               = "false"
     syntaxCheck                 = "false"
+    bootstrap                   = "scripts/boot.php"
 >
     <testsuites>
         <testsuite name="LayerCache test suite">

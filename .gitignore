@@ -3,3 +3,4 @@
 .settings
 /vendor
 /bin/phpunit
+/test/tmp

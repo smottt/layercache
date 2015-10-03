@@ -18,55 +18,31 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with LayerCache.  If not, see <http://www.gnu.org/licenses/>.
 
-@package LayerCache
+@package Tests
 **/
 
-namespace LayerCache\Cache;
-
-/**
- * @package LayerCache
- *
- * @author Gasper Kozak
- * @author Metod N <metod@simpel.si>
- */
-class Memcached implements Cache
+class FakeSource
 {
-	/** @var \Memcached */
-	protected $memcached;
-
-	/**
-	 * Construct a new memcached cache layer object.
-	 *
-	 * @param \Memcached $memcached
-	 */
-	public function __construct(\Memcached $memcached)
+	function get($key)
 	{
-		$this->memcached = $memcached;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @return mixed
-	 */
-	public function get($key)
+	function normalizeKey($key)
 	{
-		$data = $this->memcached->get($key);
-
-		if ($data === false) {
-			return null;
-		}
-
-		return $data;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @return bool
-	 */
-	public function set($key, $data, $ttl)
+	function ttl($value)
 	{
-		return $this->memcached->set($key, $data, $ttl);
+	}
+}
+
+class FakeCache implements \LayerCache\Cache\Cache
+{
+	function get($key)
+	{
+	}
+
+	function set($key, $data, $ttl)
+	{
 	}
 }

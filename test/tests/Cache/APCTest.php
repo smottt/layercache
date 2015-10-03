@@ -1,7 +1,7 @@
 <?php
 
 /**
-Copyright 2009-2011 Gasper Kozak
+Copyright 2009-2015 Gasper Kozak
 
 This file is part of LayerCache.
 
@@ -21,9 +21,7 @@ along with LayerCache.  If not, see <http://www.gnu.org/licenses/>.
 @package Tests
 **/
 
-include_once dirname(__FILE__) . '/../../lib/LayerCache.php';
-
-class APCTest extends PHPUnit_Framework_TestCase
+class APCTest extends \PHPUnit_Framework_TestCase
 {
 	protected function setUp()
 	{
@@ -38,7 +36,8 @@ class APCTest extends PHPUnit_Framework_TestCase
 	{
 		$key = 'test-simple-' . rand(100, 999);
 
-		$cache = new LayerCache_Cache_APC();
+		$cache = new \LayerCache\Cache\APC();
+
 		$this->assertSame(null, $cache->get($key));
 
 		$data = 'SOME DATA';
@@ -53,10 +52,10 @@ class APCTest extends PHPUnit_Framework_TestCase
 	{
 		$key = 'test-complex-' . rand(100, 999);
 
-		$cache = new LayerCache_Cache_APC();
+		$cache = new \LayerCache\Cache\APC();
 		$this->assertSame(null, $cache->get($key));
 
-		$data = array('x', array('a' => 12));
+		$data = ['x', ['a' => 12]];
 
 		$cache->set($key, $data, 10);
 		$this->assertEquals($data, $cache->get($key));
