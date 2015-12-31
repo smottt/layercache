@@ -50,3 +50,29 @@ class FakeCache implements \LayerCache\Cache\CachingLayer
 	{
 	}
 }
+
+if (!class_exists('\Aerospike')) {
+	class Aerospike
+	{
+		const OK = 'OK';
+		const ERR_RECORD_NOT_FOUND = 'ERR_RECORD_NOT_FOUND';
+
+		public function initKey($ns, $set, $pk, $is_digest = false) {}
+
+		public function get(
+			array $key,
+			array &$record,
+			array $filter = [],
+			array $options = []
+		) {}
+
+		public function put(
+			array $key,
+			array $bins,
+			$ttl = 0,
+			array $options = []
+		) {}
+
+		public function remove(array $key, array $options = []) {}
+	}
+}
