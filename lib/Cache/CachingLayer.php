@@ -21,37 +21,29 @@
  * @package LayerCache
  */
 
-namespace LayerCache;
+namespace LayerCache\Cache;
 
 /**
  * @package LayerCache
  *
  * @author Gasper Kozak
- * @author Metod N <metod@simpel.si>
+ * @author Metod N <metod@simpel.si
  */
-class Trace
+interface CachingLayer
 {
-	/** @var int */
-	public $time;
+	/**
+	 * Retrieve data for the key.
+	 *
+	 * @param string $key
+	 */
+	public function get($key);
 
-	/** @var string */
-	public $key;
-
-	/** @var int */
-	public $cache_count;
-
-	/** @var string */
-	public $flat_key;
-
-	/** @var int */
-	public $rand;
-
-	/** @var array */
-	public $reads = [];
-
-	/** @var array */
-	public $source = [];
-
-	/** @var array */
-	public $writes = [];
+	/**
+	 * Store data to a key.
+	 *
+	 * @param string $key
+	 * @param mixed  $data
+	 * @param int    $ttl
+	 */
+	public function set($key, $data, $ttl);
 }

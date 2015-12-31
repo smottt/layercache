@@ -1,31 +1,33 @@
 <?php
 
 /**
-Copyright 2009-2015 Gasper Kozak
-
-This file is part of LayerCache.
-
-LayerCache is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-LayerCache is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with LayerCache.  If not, see <http://www.gnu.org/licenses/>.
-
-@package LayerCache
-**/
+ * Copyright 2009-2016 Gasper Kozak
+ *
+ * This file is part of LayerCache.
+ *
+ * LayerCache is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * LayerCache is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with LayerCache.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package LayerCache
+ */
 
 namespace LayerCache;
 
+use LayerCache\Exception;
 use LayerCache\ObjectMap;
 use LayerCache\Layer;
 use LayerCache\Stack;
+use LayerCache\Cache\CachingLayer;
 
 /**
  * @package LayerCache
@@ -81,8 +83,7 @@ class StackBuilder
 		ObjectMap $cacheMap,
 		callable $dataSource,
 		callable $keySource = null
-	)
-	{
+	) {
 		$this->stackMap   = $stackMap;
 		$this->cacheMap   = $cacheMap;
 		$this->dataSource = $dataSource;
@@ -97,7 +98,7 @@ class StackBuilder
 	protected function currentLayer()
 	{
 		if ($this->currentLayer === null) {
-			throw new \RuntimeException('No cache is being added');
+			throw new Exception('No cache is being added');
 		}
 
 		return $this->currentLayer;
@@ -117,12 +118,18 @@ class StackBuilder
 	/**
 	 * Adds a cache to the stack specification
 	 *
-	 * @param  mixed $cache An arbitrary object that implements get($key) and set($key, $data, $ttl) methods, or a named cache (see LayerCache::registerCache())
+	 * @param  \LayerCache\Cache\CachingLayer $cache
 	 * @return \LayerCache\StackBuilder
 	 */
 	public function addLayer($cache)
 	{
 		if (is_object($cache)) {
+			if (!($cache instanceof CachingLayer)) {
+				throw new \LayerCache\Exception(
+					'Cache should implement \LayerCache\Cache\CachingLayer interface!'
+				);
+			}
+
 			$obj = $cache;
 		} elseif (is_string($cache)) {
 			if (!$this->cacheMap->has($cache)) {
@@ -133,13 +140,13 @@ class StackBuilder
 
 			$obj = $this->cacheMap->get($cache);
 		} else {
-			throw new \LayerCache\Exception(
+			throw new Exception(
 				'Cache should be an object or a string'
 			);
 		}
 
 		$this->currentLayer = $this->createLayer($obj);
-		$this->layers[]    = $this->currentLayer;
+		$this->layers[]     = $this->currentLayer;
 
 		return $this;
 	}
@@ -229,8 +236,7 @@ class StackBuilder
 		callable $dataSource,
 		callable $keySource = null,
 		array $layers = []
-	)
-	{
+	) {
 		return new Stack($dataSource, $keySource, $layers);
 	}
 }
