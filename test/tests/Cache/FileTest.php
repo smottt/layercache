@@ -23,47 +23,86 @@
 
 class FileTest extends \PHPUnit_Framework_TestCase
 {
+	/** @var \LayerCache\Cache\File */
 	protected $cache;
 
-	protected function setUp()
+	/**
+	 * @before
+	 */
+	public function setUp_Cache()
+	{
+		$this->cache = new \LayerCache\Cache\File(LAYERCACHE_TEST_TMP_DIR);
+	}
+
+	/**
+	 * @before
+	 */
+	public function cleanTempDir()
 	{
 		foreach (new DirectoryIterator(LAYERCACHE_TEST_TMP_DIR) as $file) {
 			if ($file->isFile() && !$file->isDot()) {
 				unlink($file->getPathName());
 			}
 		}
-
-		$this->cache = new \LayerCache\Cache\File(LAYERCACHE_TEST_TMP_DIR);
 	}
 
+	/**
+	 * @test
+	 */
 	public function testGetEmpty()
 	{
-		$this->assertSame(null, $this->cache->get('test'));
+		$this->assertNull($this->cache->get('test'));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testSetAndGet()
 	{
-		$this->assertSame(null, $this->cache->get('test'));
+		$this->assertNull($this->cache->get('test'));
 		$this->cache->set('test', 'DATA', 10);
 		$this->assertSame('DATA', $this->cache->get('test'));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testSetAndGetComplexStructure()
 	{
-		$this->assertSame(null, $this->cache->get('test'));
-		$o = new stdClass;
+		$this->assertNull($this->cache->get('test'));
+		$o = new \stdClass();
 		$o->z = 34;
 		$data = ['x', $o, ['a' => 12]];
 		$this->cache->set('test', serialize($data), 10);
 		$this->assertEquals($data, unserialize($this->cache->get('test')));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testTTL()
 	{
-		$this->assertSame(null, $this->cache->get('test'));
+		$this->assertNull($this->cache->get('test'));
 		$this->cache->set('test', 'DATA', 1);
 		$this->assertSame('DATA', $this->cache->get('test'));
 		sleep(2);
-		$this->assertSame(null, $this->cache->get('test'));
+		$this->assertNull($this->cache->get('test'));
+	}
+
+	/**
+	 * @test
+	 */
+	public function testSetAndDel()
+	{
+		$key  = 'test';
+		$data = 'SOME DATA';
+
+		$this->assertNull($this->cache->get($key));
+
+		$this->cache->set($key, $data, 10);
+
+		$this->assertSame($data, $this->cache->get($key));
+		$this->assertTrue($this->cache->del($key));
+		$this->assertNull($this->cache->get($key));
 	}
 }

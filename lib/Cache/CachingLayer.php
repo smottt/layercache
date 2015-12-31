@@ -46,4 +46,11 @@ interface CachingLayer
 	 * @param int    $ttl
 	 */
 	public function set($key, $data, $ttl);
+
+	/**
+	 * Delete a key.
+	 *
+	 * @param string $key
+	 */
+	public function del($key);
 }

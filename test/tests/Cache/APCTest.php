@@ -23,6 +23,20 @@
 
 class APCTest extends \PHPUnit_Framework_TestCase
 {
+	/** @var \LayerCache\Cache\APC */
+	protected $cache;
+
+	/**
+	 * @before
+	 */
+	public function setUp_APC_Cache()
+	{
+		$this->cache = new \LayerCache\Cache\APC();
+	}
+
+	/**
+	 * Check for extension availability and perform cleanup.
+	 */
 	protected function setUp()
 	{
 		if (!extension_loaded('apc') || !ini_get('apc.enable_cli')) {
@@ -32,32 +46,57 @@ class APCTest extends \PHPUnit_Framework_TestCase
 		apc_delete('test');
 	}
 
+	/**
+	 * @test
+	 */
 	public function testSetAndGet()
 	{
 		$key = 'test-simple-' . rand(100, 999);
 
-		$cache = new \LayerCache\Cache\APC();
-
-		$this->assertSame(null, $cache->get($key));
+		$this->assertNull($this->cache->get($key));
 
 		$data = 'SOME DATA';
 
-		$cache->set($key, $data, 1);
+		$this->cache->set($key, $data, 1);
 
 		$this->assertSame($data, apc_fetch($key));
-		$this->assertSame($data, $cache->get($key));
+		$this->assertSame($data, $this->cache->get($key));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testSetAndGetComplexStructure()
 	{
 		$key = 'test-complex-' . rand(100, 999);
 
-		$cache = new \LayerCache\Cache\APC();
-		$this->assertSame(null, $cache->get($key));
+		$this->assertNull($this->cache->get($key));
 
 		$data = ['x', ['a' => 12]];
 
-		$cache->set($key, $data, 10);
-		$this->assertEquals($data, $cache->get($key));
+		$this->cache->set($key, $data, 10);
+		$this->assertEquals($data, $this->cache->get($key));
+	}
+
+	/**
+	 * @test
+	 */
+	public function testSetAndDel()
+	{
+		$key = 'test-del-' . rand(100, 999);
+
+		$this->assertNull($this->cache->get($key));
+
+		$data = 'SOME DATA';
+
+		$this->cache->set($key, $data, 10);
+
+		$this->assertSame($data, apc_fetch($key));
+		$this->assertSame($data, $this->cache->get($key));
+
+		$this->assertTrue($this->cache->del($key));
+
+		$this->assertFalse(apc_exists($key));
+		$this->assertNull($this->cache->get($key));
 	}
 }

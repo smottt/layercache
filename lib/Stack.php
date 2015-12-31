@@ -266,13 +266,8 @@ class Stack
 	 */
 	public function set($key, $data)
 	{
-		$now = time();
-
-		if ($this->keyMapper) {
-			$mappedKey = call_user_func($this->keyMapper, $key);
-		} else {
-			$mappedKey = $key;
-		}
+		$now       = time();
+		$mappedKey = $this->mapKey($key);
 
 		foreach ($this->layers as $layer) {
 			$entry = $this->serialize(
@@ -285,10 +280,40 @@ class Stack
 	}
 
 	/**
+	 * Remove data from all cache layers
+	 *
+	 * @param mixed $key
+	 */
+	public function del($key)
+	{
+		$mappedKey = $this->mapKey($key);
+
+		foreach ($this->layers as $layer) {
+			$layer->cache->del($mappedKey);
+		}
+	}
+
+	/**
+	 * Map a key using a key mapper if available
+	 *
+	 * @param  mixed $key
+	 * @return mixed
+	 */
+	protected function mapKey($key)
+	{
+		if ($this->keyMapper) {
+			return call_user_func($this->keyMapper, $key);
+		}
+
+		return $key;
+	}
+
+	/**
 	 * Internal serialization mapper
 	 *
-	 * @param mixed  $data
-	 * @param string $method php, json, null
+	 * @param  mixed  $data
+	 * @param  string $method php, json, null
+	 * @return mixed
 	 */
 	protected function serialize($data, $method)
 	{
@@ -306,8 +331,9 @@ class Stack
 	/**
 	 * Internal unserialization mapper
 	 *
-	 * @param mixed  $data
-	 * @param string $method php, json, null
+	 * @param  mixed  $data
+	 * @param  string $method php, json, null
+	 * @return mixed
 	 */
 	protected function unserialize($data, $method)
 	{

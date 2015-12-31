@@ -447,4 +447,28 @@ class StackTest extends \PHPUnit_Framework_TestCase
 
 		$this->assertSame(null, $stack->get(5));
 	}
+
+	public function testDeleteData()
+	{
+		$source = $this->getMock('FakeSource');
+		$source->expects($this->never())->method('get');
+		$source->expects($this->once())->method('normalizeKey')->with(5)->will($this->returnValue('k:5'));
+
+		$cache1 = $this->getMock('FakeCache');
+		$cache1->expects($this->never())->method('get');
+		$cache1->expects($this->never())->method('set');
+		$cache1->expects($this->once())->method('del')->with('k:5');
+
+		$cache2 = $this->getMock('FakeCache');
+		$cache2->expects($this->never())->method('get');
+		$cache2->expects($this->never())->method('set');
+		$cache2->expects($this->once())->method('del')->with('k:5');
+
+		$stack = new \LayerCache\Stack([$source, 'get'], [$source, 'normalizeKey'], array(
+			$this->createLayer($cache1, 7, 7, 0, 1, null),
+			$this->createLayer($cache2, 15, 15, 5, 0.5, null)
+		));
+
+		$stack->del(5);
+	}
 }

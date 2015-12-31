@@ -23,26 +23,30 @@
 
 class FakeSource
 {
-	function get($key)
+	public function get($key)
 	{
 	}
 
-	function normalizeKey($key)
+	public function normalizeKey($key)
 	{
 	}
 
-	function ttl($value)
+	public function ttl($value)
 	{
 	}
 }
 
 class FakeCache implements \LayerCache\Cache\CachingLayer
 {
-	function get($key)
+	public function get($key)
 	{
 	}
 
-	function set($key, $data, $ttl)
+	public function set($key, $data, $ttl)
+	{
+	}
+
+	public function del($key)
 	{
 	}
 }

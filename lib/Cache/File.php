@@ -44,7 +44,7 @@ class File implements CachingLayer
 	 */
 	public function __construct($dir)
 	{
-		if (substr($dir, -1) != DIRECTORY_SEPARATOR) {
+		if (substr($dir, -1) !== DIRECTORY_SEPARATOR) {
 			$dir .= DIRECTORY_SEPARATOR;
 		}
 
@@ -66,7 +66,7 @@ class File implements CachingLayer
 	 */
 	public function get($key)
 	{
-		$fname = $this->dir . sha1($key);
+		$fname = $this->generateFilePath($key);
 
 		if (!file_exists($fname)) {
 			return null;
@@ -88,11 +88,38 @@ class File implements CachingLayer
 	 */
 	public function set($key, $data, $ttl)
 	{
-		$fname    = $this->dir . sha1($key);
+		$fname    = $this->generateFilePath($key);
 		$tempName = $fname . '-' . mt_rand(10000, 99999);
 
 		file_put_contents($tempName, time() + $ttl . "\n" . $data);
 
 		return rename($tempName, $fname);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @return bool
+	 */
+	public function del($key)
+	{
+		$fname = $this->generateFilePath($key);
+
+		if (!file_exists($fname)) {
+			return true;
+		}
+
+		return @unlink($fname);
+	}
+
+	/**
+	 * Generate the cache file path for a particular key.
+	 *
+	 * @param  string $key
+	 * @return string
+	 */
+	protected function generateFilePath($key)
+	{
+		return $this->dir . sha1($key);
 	}
 }

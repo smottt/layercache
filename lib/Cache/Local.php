@@ -113,15 +113,25 @@ class Local implements CachingLayer
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public function del($key)
+	{
+		if (!array_key_exists($key, $this->items)) {
+			return;
+		}
+
+		$this->count--;
+		$this->size -= $this->items[$key]['size'];
+
+		unset($this->items[$key]);
+	}
+
+	/**
 	 * Evicts a single item
 	 */
 	protected function evict()
 	{
-		$k = key($this->items);
-
-		$this->count--;
-		$this->size = $this->size - $this->items[$k]['size'];
-
-		unset($this->items[$k]);
+		$this->del(key($this->items));
 	}
 }

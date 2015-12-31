@@ -23,6 +23,9 @@
 
 class LocalTest extends \PHPUnit_Framework_TestCase
 {
+	/**
+	 * @test
+	 */
 	public function testUnlimited()
 	{
 		$c = new \LayerCache\Cache\Local();
@@ -36,10 +39,13 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 		$this->assertSame('AAAAAAAAAAA', $c->get('b'));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testCountLimit()
 	{
 		$c = new \LayerCache\Cache\Local(0, 2);
-		$this->assertSame(null, $c->get('a'));
+		$this->assertNull($c->get('a'));
 
 		$c->set('a', 'A', null);
 		$this->assertSame('A', $c->get('a'));
@@ -47,8 +53,8 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 		$c->set('x', 'X', null);
 		$c->set('y', 'Y', null);
 		$c->set('z', 'Z', null);
-		$this->assertSame(null, $c->get('a'));
-		$this->assertSame(null, $c->get('x'));
+		$this->assertNull($c->get('a'));
+		$this->assertNull($c->get('x'));
 		$this->assertSame('Y', $c->get('y'));
 		$this->assertSame('Z', $c->get('z'));
 
@@ -57,22 +63,25 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 		$this->assertSame('Z2', $c->get('z'));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testSizeLimit()
 	{
 		$c = new \LayerCache\Cache\Local(10, 0);
-		$this->assertSame(null, $c->get('a'));
+		$this->assertNull($c->get('a'));
 
 		$c->set('a', 'AAAAA', null);
 		$this->assertSame('AAAAA', $c->get('a'));
 
 		$c->set('x', 'XXXXX', null);
 		$c->set('y', 'YYY', null);
-		$this->assertSame(null, $c->get('a'));
+		$this->assertNull($c->get('a'));
 		$this->assertSame('XXXXX', $c->get('x'));
 		$this->assertSame('YYY', $c->get('y'));
 
 		$c->set('y', 'YYYYYYY', null);
-		$this->assertSame(null, $c->get('x'));
+		$this->assertNull($c->get('x'));
 		$this->assertSame('YYYYYYY', $c->get('y'));
 
 		$c->set('a', 'AAAAA', null);
@@ -81,14 +90,17 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 		$this->assertSame('AAAAA', $c->get('a'));
 		$this->assertSame('BBBBB', $c->get('b'));
 		$c->set('c', 'CCCCCC', null);
-		$this->assertSame(null, $c->get('a'));
-		$this->assertSame(null, $c->get('b'));
+		$this->assertNull($c->get('a'));
+		$this->assertNull($c->get('b'));
 		$this->assertSame('CCCCCC', $c->get('c'));
 
 		$c->set('y', 'YYYYYYYYYYYYYYYY', null);
-		$this->assertSame(null, $c->get('y'));
+		$this->assertNull($c->get('y'));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testEvictsLeastRecent()
 	{
 		$c = new \LayerCache\Cache\Local(0, 2);
@@ -98,16 +110,37 @@ class LocalTest extends \PHPUnit_Framework_TestCase
 		$this->assertSame('A', $c->get('a'));
 		$c->set('c', 'C', null);
 		$this->assertSame('A', $c->get('a'));
-		$this->assertSame(null, $c->get('b'));
+		$this->assertNull($c->get('b'));
 		$this->assertSame('C', $c->get('c'));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testStoreArraySerialize()
 	{
 		$c = new \LayerCache\Cache\Local(40, 0);
 		$c->set('a', ['AAAAA'], null);
 		$c->set('b', ['BBBBB'], null);
-		$this->assertSame(null, $c->get('a'));
+		$this->assertNull($c->get('a'));
 		$this->assertSame(['BBBBB'], $c->get('b'));
+	}
+
+	/**
+	 * @test
+	 */
+	public function testSetAndDel()
+	{
+		$key  = 'test/v1';
+		$data = 'SOME DATA';
+
+		$cache = new \LayerCache\Cache\Local();
+		$cache->set($key, $data, 10);
+
+		$this->assertSame($data, $cache->get($key));
+
+		$cache->del($key);
+
+		$this->assertNull($cache->get($key));
 	}
 }

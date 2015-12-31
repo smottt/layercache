@@ -71,4 +71,14 @@ class Memcached implements CachingLayer
 	{
 		return $this->memcached->set($key, $data, $ttl);
 	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @return bool
+	 */
+	public function del($key)
+	{
+		return $this->memcached->delete($key);
+	}
 }

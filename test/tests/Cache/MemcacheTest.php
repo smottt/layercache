@@ -23,50 +23,87 @@
 
 class MemcacheTest extends \PHPUnit_Framework_TestCase
 {
-	protected function setUp()
+	/**
+	 * @before
+	 */
+	protected function checkExtensionAvailability()
 	{
 		if (!extension_loaded('memcache')) {
 			$this->markTestSkipped('Memcache extension not available.');
 		}
 	}
 
+	/**
+	 * @test
+	 */
 	public function testGetEmpty()
 	{
 		$mc = $this->getMock('Memcache', ['get']);
-		$mc->expects($this->once())->method('get')->with('test')->will($this->returnValue(false));
+		$mc->expects($this->once())->method('get')->with('test')->willReturn(false);
 		$cache = new \LayerCache\Cache\Memcache($mc);
-		$this->assertSame(null, $cache->get('test'));
+		$this->assertNull($cache->get('test'));
 	}
 
-	function testSetAndGet()
+	/**
+	 * @test
+	 */
+	public function testSetAndGet()
 	{
 		$mc = $this->getMock('Memcache', ['get', 'set']);
 
-		$mc->expects($this->at(0))->method('get')->with('test')->will($this->returnValue(false));
+		$mc->expects($this->at(0))->method('get')->with('test')->willReturn(false);
 		$mc->expects($this->at(1))->method('set')->with('test', 'DATA', false, 10);
-		$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue('DATA'));
+		$mc->expects($this->at(2))->method('get')->with('test')->willReturn('DATA');
 
 		$cache = new \LayerCache\Cache\Memcache($mc);
-		$this->assertSame(null, $cache->get('test'));
+		$this->assertNull($cache->get('test'));
 		$cache->set('test', 'DATA', 10);
 		$this->assertSame('DATA', $cache->get('test'));
 	}
 
-	function testSetAndGetComplexStructure()
+	/**
+	 * @test
+	 */
+	public function testSetAndGetComplexStructure()
 	{
 		$mc = $this->getMock('Memcache', ['get', 'set']);
 
-		$o = new stdClass;
+		$o = new \stdClass();
 		$o->z = 34;
 		$data = ['x', $o, ['a' => 12]];
 
-		$mc->expects($this->at(0))->method('get')->with('test')->will($this->returnValue(false));
+		$mc->expects($this->at(0))->method('get')->with('test')->willReturn(false);
 		$mc->expects($this->at(1))->method('set')->with('test', $data, 7, 10);
-		$mc->expects($this->at(2))->method('get')->with('test')->will($this->returnValue(serialize($data)));
+		$mc->expects($this->at(2))->method('get')->with('test')->willReturn(serialize($data));
 
 		$cache = new \LayerCache\Cache\Memcache($mc, 7);
-		$this->assertSame(null, $cache->get('test'));
+		$this->assertNull($cache->get('test'));
 		$cache->set('test', $data, 10);
 		$this->assertEquals($data, unserialize($cache->get('test')));
+	}
+
+	/**
+	 * @test
+	 */
+	public function testSetAndDel()
+	{
+		$data = 'SOME DATA';
+
+		$mc = $this->getMock('Memcache', ['get', 'set', 'delete']);
+		$mc->expects($this->at(0))->method('get')->with('test')->willReturn(false);
+		$mc->expects($this->at(1))->method('set')->with('test', $data, 7, 10);
+		$mc->expects($this->at(2))->method('get')->with('test')->willReturn($data);
+		$mc->expects($this->at(3))->method('delete')->with('test')->willReturn(true);
+		$mc->expects($this->at(4))->method('get')->with('test')->willReturn(false);
+
+		$cache = new \LayerCache\Cache\Memcache($mc, 7);
+
+		$this->assertNull($cache->get('test'));
+
+		$cache->set('test', $data, 10);
+
+		$this->assertSame($data, $cache->get('test'));
+		$this->assertTrue($cache->del('test'));
+		$this->assertNull($cache->get('test'));
 	}
 }

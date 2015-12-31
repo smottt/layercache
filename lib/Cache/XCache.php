@@ -58,4 +58,14 @@ class XCache implements CachingLayer
 	{
 		return xcache_set($key, $data, $ttl);
 	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @return bool
+	 */
+	public function del($key)
+	{
+		return xcache_unset($key);
+	}
 }

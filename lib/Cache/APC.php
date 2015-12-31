@@ -58,4 +58,14 @@ class APC implements CachingLayer
 	{
 		return apc_store($key, $data, $ttl);
 	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @return bool
+	 */
+	public function del($key)
+	{
+		return apc_delete($key);
+	}
 }

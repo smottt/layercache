@@ -140,9 +140,7 @@ class StackBuilder
 
 			$obj = $this->cacheMap->get($cache);
 		} else {
-			throw new Exception(
-				'Cache should be an object or a string'
-			);
+			throw new Exception('Cache should be an object or a string');
 		}
 
 		$this->currentLayer = $this->createLayer($obj);
