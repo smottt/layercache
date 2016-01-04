@@ -118,7 +118,7 @@ class StackBuilder
 	/**
 	 * Adds a cache to the stack specification
 	 *
-	 * @param  \LayerCache\Cache\CachingLayer $cache
+	 * @param  \LayerCache\Cache\CachingLayer|string $cache
 	 * @return \LayerCache\StackBuilder
 	 */
 	public function addLayer($cache)
