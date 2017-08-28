@@ -11,6 +11,10 @@ php:
 install:
     - 'composer install --prefer-dist --no-suggest'
 
+before_script:
+    - 'echo "extension = apc.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini'
+    - 'echo "extension = memcache.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini'
+
 script:
     - 'cd test && ../vendor/bin/phpunit -c phpunit.xml --debug'
 
