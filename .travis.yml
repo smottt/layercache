@@ -1,5 +1,5 @@
 dist: trusty
-sudo: false
+sudo: required
 
 language: php
 
@@ -13,9 +13,9 @@ install:
 
 before_script:
     - |
-        # APCu is only available for PHP 7.x
+        # Enable APCu for PHP 7.x
         if [[ $TRAVIS_PHP_VERSION = 7.* ]]; then
-            echo "extension = apcu.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+            yes '' | pecl install -f apcu
         fi
 
 script:
