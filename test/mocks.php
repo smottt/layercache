@@ -20,59 +20,76 @@
  *
  * @package Tests
  */
+namespace {
+    if (!class_exists('\Aerospike')) {
+        class Aerospike
+        {
+            const OK                   = 'OK';
+            const ERR_RECORD_NOT_FOUND = 'ERR_RECORD_NOT_FOUND';
 
-class FakeSource
-{
-	public function get($key)
-	{
-	}
+            public function initKey($ns, $set, $pk, $is_digest = false)
+            {
+            }
 
-	public function normalizeKey($key)
-	{
-	}
+            public function get(
+                array $key,
+                array &$record,
+                array $filter = [],
+                array $options = []
+            ) {}
 
-	public function ttl($value)
-	{
-	}
+            public function put(
+                array $key,
+                array $bins,
+                $ttl = 0,
+                array $options = []
+            ) {}
+
+            public function remove(array $key, array $options = [])
+            {
+            }
+        }
+    }
 }
 
-class FakeCache implements \LayerCache\Cache\CachingLayer
-{
-	public function get($key)
-	{
-	}
+namespace LayerCache\Test {
+    use LayerCache\Cache\CachingLayer;
 
-	public function set($key, $data, $ttl)
-	{
-	}
+    class FakeSource
+    {
+        public function get($key)
+        {
+        }
 
-	public function del($key)
-	{
-	}
-}
+        public function normalizeKey($key)
+        {
+        }
 
-if (!class_exists('\Aerospike')) {
-	class Aerospike
-	{
-		const OK = 'OK';
-		const ERR_RECORD_NOT_FOUND = 'ERR_RECORD_NOT_FOUND';
+        public function ttl($value)
+        {
+        }
 
-		public function initKey($ns, $set, $pk, $is_digest = false) {}
+        public function getById($id)
+        {
+        }
 
-		public function get(
-			array $key,
-			array &$record,
-			array $filter = [],
-			array $options = []
-		) {}
+        public function mapKey($key)
+        {
+        }
+    }
 
-		public function put(
-			array $key,
-			array $bins,
-			$ttl = 0,
-			array $options = []
-		) {}
+    class FakeCache implements CachingLayer
+    {
+        public function get($key)
+        {
+        }
 
-		public function remove(array $key, array $options = []) {}
-	}
+        public function set($key, $data, $ttl)
+        {
+        }
+
+        public function del($key)
+        {
+        }
+    }
 }

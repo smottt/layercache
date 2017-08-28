@@ -1,5 +1,17 @@
 <?php
 
+namespace LayerCache\Tests;
+
+use LayerCache\Cache\CachingLayer;
+use LayerCache\Layer;
+use LayerCache\LayerCache;
+use LayerCache\ObjectMap;
+use LayerCache\Test\FakeCache;
+use LayerCache\Test\FakeSource;
+use PHPUnit\Framework\TestCase;
+use LayerCache\Stack;
+use LayerCache\StackBuilder;
+
 /**
  * Copyright 2009-2016 Gasper Kozak
  *
@@ -20,51 +32,86 @@
  *
  * @package Tests
  */
-
-use LayerCache\LayerCache;
-use LayerCache\ObjectMap;
-
-class StackBuilderTest extends \PHPUnit_Framework_TestCase
+class StackBuilderTest extends TestCase
 {
+    /**
+     * @test
+     */
 	public function testCreateWithoutCache()
 	{
-		$source = new FakeSource;
-		$stack = $this->getMock('\LayerCache\Stack', [], [[$source, 'get'], [$source, 'normalizeKey'], []]);
+		$source = new FakeSource();
 
-		$stack_map = $this->getMock('\LayerCache\ObjectMap');
-		$stack_map->expects($this->once())
+		$stack = $this->getMockBuilder(Stack::class)
+            ->setConstructorArgs([
+                [$source, 'get'],
+                [$source, 'normalizeKey'],
+                []
+            ])
+            ->getMock()
+        ;
+
+		$stackMap = $this->createMock(ObjectMap::class);
+		$stackMap->expects($this->once())
 			->method('set')
 			->with('fake', $stack)
 		;
 
-		$cache_map = new ObjectMap;
-
-		$pb = $this->getMock('\LayerCache\StackBuilder', ['createStack'], [$stack_map, $cache_map, [$source, 'get'], [$source, 'normalizeKey']]);
+		/** @var \PHPUnit_Framework_MockObject_MockObject|StackBuilder $pb */
+		$pb = $this->getMockBuilder(StackBuilder::class)
+            ->setMethods(['createStack'])
+            ->setConstructorArgs([
+                $stackMap,
+                new ObjectMap(),
+                [$source, 'get'], [$source, 'normalizeKey']
+            ])
+            ->getMock()
+        ;
 
 		$pb->expects($this->once())
 			->method('createStack')
 			->with([$source, 'get'], [$source, 'normalizeKey'], [])
-			->will($this->returnValue($stack))
+			->willReturn($stack)
 		;
 
 		$p = $pb->toStack('fake');
 		$this->assertSame($p, $stack);
 	}
 
+	/**
+	 * @test
+	 */
 	public function testAppendCache()
 	{
-		$source = new FakeSource;
-		$stack = $this->getMock('\LayerCache\Stack', [], [[$source, 'get'], [$source, 'normalizeKey'], []]);
-		$cache = new FakeCache;
-		$layer = new \LayerCache\Layer($cache);
+		$source = new FakeSource();
+		$stack = $this->getMockBuilder(Stack::class)
+            ->setConstructorArgs([
+                [$source, 'get'],
+                [$source, 'normalizeKey'],
+                []
+            ])
+            ->getMock()
+        ;
 
-		$stack_map = $this->getMock('\LayerCache\ObjectMap');
-		$stack_map->expects($this->once())->
-			method('set')->
-			with('fake', $stack);
+		$cache = new FakeCache();
+		$layer = new Layer($cache);
 
-		$cache_map = new ObjectMap;
-		$pb = $this->getMock('\LayerCache\StackBuilder', ['createLayer', 'createStack'], [$stack_map, $cache_map, [$source, 'get'], [$source, 'normalizeKey']]);
+		$stackMap = $this->createMock(ObjectMap::class);
+		$stackMap->expects($this->once())
+            ->method('set')
+            ->with('fake', $stack)
+        ;
+
+		/** @var \PHPUnit_Framework_MockObject_MockObject|StackBuilder $pb */
+		$pb = $this->getMockBuilder(StackBuilder::class)
+            ->setMethods(['createLayer', 'createStack'])
+            ->setConstructorArgs([
+                $stackMap,
+                new ObjectMap(),
+                [$source, 'get'],
+                [$source, 'normalizeKey']
+            ])
+            ->getMock()
+        ;
 
 		$pb->expects($this->once())
 			->method('createLayer')
@@ -84,20 +131,35 @@ class StackBuilderTest extends \PHPUnit_Framework_TestCase
 
 	public function testAppendCacheWithPrefetch()
 	{
-		$source = new FakeSource;
-		$stack = $this->getMock('\LayerCache\Stack', [], [[$source, 'get'], [$source, 'normalizeKey'], []]);
-		$cache = new FakeCache;
-		$layer = new \LayerCache\Layer($cache);
+		$source = new FakeSource();
+		$stack = $this->getMockBuilder(Stack::class)
+            ->setConstructorArgs([
+                [$source, 'get'],
+                [$source, 'normalizeKey']
+            ])
+            ->getMock()
+        ;
 
-		$stack_map = $this->getMock('\LayerCache\ObjectMap');
-		$stack_map->expects($this->once())
+		$cache = new FakeCache();
+		$layer = new Layer($cache);
+
+		$stackMap = $this->createMock(ObjectMap::class);
+		$stackMap->expects($this->once())
 			->method('set')
 			->with('fake', $stack)
 		;
 
-		$cache_map = new ObjectMap;
-
-		$pb = $this->getMock('\LayerCache\StackBuilder', ['createLayer', 'createStack'], [$stack_map, $cache_map, [$source, 'get'], [$source, 'normalizeKey']]);
+		/** @var \PHPUnit_Framework_MockObject_MockObject|StackBuilder $pb */
+		$pb = $this->getMockBuilder(StackBuilder::class)
+            ->setMethods(['createLayer', 'createStack'])
+            ->setConstructorArgs([
+                $stackMap,
+                new ObjectMap(),
+                [$source, 'get'],
+                [$source, 'normalizeKey']
+            ])
+            ->getMock()
+        ;
 
 		$pb->expects($this->once())
 			->method('createLayer')
@@ -117,39 +179,53 @@ class StackBuilderTest extends \PHPUnit_Framework_TestCase
 
 	public function testAppendTwoCaches()
 	{
-		$source = new FakeSource;
-		$stack = $this->getMock('\LayerCache\Stack', [], [[$source, 'get'], [$source, 'normalizeKey'], []]);
-		$cache1 = new FakeCache;
-		$layer1 = new \LayerCache\Layer($cache1);
-		$cache2 = new FakeCache;
-		$layer2 = new \LayerCache\Layer($cache2);
+		$source = new FakeSource();
+		$stack = $this->getMockBuilder(Stack::class)
+            ->setConstructorArgs([
+                [$source, 'get'],
+                [$source, 'normalizeKey']
+            ])
+            ->getMock()
+        ;
+		$cache1 = new FakeCache();
+		$layer1 = new Layer($cache1);
+		$cache2 = new FakeCache();
+		$layer2 = new Layer($cache2);
 
-		$stack_map = $this->getMock('\LayerCache\ObjectMap');
-		$stack_map->expects($this->once())
+		$stackMap = $this->createMock(ObjectMap::class);
+		$stackMap->expects($this->once())
 			->method('set')
 			->with('fake', $stack)
 		;
 
-		$cache_map = new ObjectMap;
-
-		$pb = $this->getMock('\LayerCache\StackBuilder', ['createLayer', 'createStack'], [$stack_map, $cache_map, [$source, 'get'], [$source, 'normalizeKey']]);
+		/** @var \PHPUnit_Framework_MockObject_MockObject|StackBuilder $pb */
+		$pb = $this->getMockBuilder(StackBuilder::class)
+            ->setMethods(['createLayer', 'createStack'])
+            ->setConstructorArgs([
+                $stackMap,
+                new ObjectMap(),
+                [$source, 'get'],
+                [$source, 'normalizeKey']
+            ])
+            ->getMock()
+        ;
 
 		$pb->expects($this->at(0))
 			->method('createLayer')
 			->with($cache1)
-			->will($this->returnValue($layer1))
+            ->willReturn($layer1)
 		;
 
 		$pb->expects($this->at(1))
 			->method('createLayer')
 			->with($cache2)
-			->will($this->returnValue($layer2))
+            ->willReturn($layer2)
 		;
 
 		$pb->expects($this->at(2))
 			->method('createStack')
 			->with([$source, 'get'], [$source, 'normalizeKey'], [$layer1, $layer2])
-			->will($this->returnValue($stack))
+            ->willReturn($stack)
 		;
 
 		$p = $pb
@@ -162,11 +238,16 @@ class StackBuilderTest extends \PHPUnit_Framework_TestCase
 
 	public function testAddLayerWithNamedCache()
 	{
-		$cache = $this->getMock('FakeCache', ['get']);
-		$cache->expects($this->once())->method('get')->with('kee')->will($this->returnValue(serialize(['d' => 'DATA', 'e' => time() + 10])));
+	    /** @var \PHPUnit_Framework_MockObject_MockObject|CachingLayer $cache */
+	    $cache = $this->createMock(CachingLayer::class);
+		$cache->expects($this->once())
+            ->method('get')
+            ->with('kee')
+            ->willReturn(serialize(['d' => 'DATA', 'e' => time() + 10]))
+        ;
 
 		LayerCache::registerCache('cache1', $cache);
-		LayerCache::forSource([new FakeSource, 'get'])
+		LayerCache::forSource([new FakeSource(), 'get'])
 			->addLayer('cache1')
 			->toStack('named')
 		;

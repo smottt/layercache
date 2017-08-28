@@ -1,0 +1,26 @@
+dist: trusty
+sudo: required
+
+language: php
+
+php:
+    - '5.6'
+    - '7.0'
+    - '7.1'
+
+install:
+    - 'composer install --prefer-dist --no-suggest'
+
+before_script:
+    - |
+        # Enable APCu for PHP 7.x
+        if [[ $TRAVIS_PHP_VERSION = 7.* ]]; then
+            yes '' | pecl install -f apcu
+        fi
+
+script:
+    - 'cd test && ../vendor/bin/phpunit -c phpunit.xml --debug'
+
+cache:
+  directories:
+    - '$HOME/.composer/cache'

@@ -1,5 +1,9 @@
 <?php
 
+namespace LayerCache\Tests\Cache;
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * Copyright 2009-2016 Gasper Kozak
  *
@@ -20,8 +24,7 @@
  *
  * @package Tests
  */
-
-class XCacheTest extends \PHPUnit_Framework_TestCase
+class XCacheTest extends TestCase
 {
 	/** @var \LayerCache\Cache\XCache */
 	protected $cache;

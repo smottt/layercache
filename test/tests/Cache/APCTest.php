@@ -1,5 +1,9 @@
 <?php
 
+namespace LayerCache\Tests\Cache;
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * Copyright 2009-2016 Gasper Kozak
  *
@@ -21,7 +25,7 @@
  * @package Tests
  */
 
-class APCTest extends \PHPUnit_Framework_TestCase
+class APCTest extends TestCase
 {
 	/** @var \LayerCache\Cache\APC */
 	protected $cache;

@@ -1,5 +1,10 @@
 <?php
 
+namespace LayerCache\Tests;
+
+use LayerCache\ObjectMap;
+use PHPUnit\Framework\TestCase;
+
 /**
  * Copyright 2009-2016 Gasper Kozak
  *
@@ -20,20 +25,22 @@
  *
  * @package Tests
  */
-
-use LayerCache\ObjectMap;
-
-class ObjectMapTest extends \PHPUnit_Framework_TestCase
+class ObjectMapTest extends TestCase
 {
 	/**
-	 * @expectedException \RuntimeException
+	 * @test
 	 */
 	public function testNoStack()
 	{
+	    $this->expectException(\RuntimeException::class);
+
 		$map = new ObjectMap;
 		$map->get('Inexistent');
 	}
 
+	/**
+	 * @test
+	 */
 	public function testSetGet()
 	{
 		$map   = new ObjectMap;

@@ -1,5 +1,9 @@
 <?php
 
+namespace LayerCache\Tests\Cache;
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * Copyright 2009-2016 Gasper Kozak
  *
@@ -20,8 +24,7 @@
  *
  * @package Tests
  */
-
-class FileTest extends \PHPUnit_Framework_TestCase
+class FileTest extends TestCase
 {
 	/** @var \LayerCache\Cache\File */
 	protected $cache;
@@ -39,7 +42,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function cleanTempDir()
 	{
-		foreach (new DirectoryIterator(LAYERCACHE_TEST_TMP_DIR) as $file) {
+		foreach (new \DirectoryIterator(LAYERCACHE_TEST_TMP_DIR) as $file) {
 			if ($file->isFile() && !$file->isDot()) {
 				unlink($file->getPathName());
 			}

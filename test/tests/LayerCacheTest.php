@@ -1,5 +1,13 @@
 <?php
 
+namespace LayerCache\Tests\Cache;
+
+use LayerCache\LayerCache;
+use LayerCache\StackBuilder;
+use LayerCache\Test\FakeCache;
+use LayerCache\Test\FakeSource;
+use PHPUnit\Framework\TestCase;
+
 /**
  * Copyright 2009-2016 Gasper Kozak
  *
@@ -20,53 +28,78 @@
  *
  * @package Tests
  */
-
-use LayerCache\LayerCache;
-
-class LayerCacheTest extends \PHPUnit_Framework_TestCase
+class LayerCacheTest extends TestCase
 {
-	protected function setup()
-	{
+    /**
+     * @before
+     */
+    public function clearCache()
+    {
 		LayerCache::clear();
-	}
+    }
 
+    /**
+     * @test
+     */
 	public function testForSourceReturnsStackBuilder()
 	{
-		$source = new FakeSource;
+		$source = new FakeSource();
 		$b = LayerCache::forSource([$source, 'get']);
-		$this->assertInstanceOf('\LayerCache\StackBuilder', $b);
+
+		$this->assertInstanceOf(StackBuilder::class, $b);
 	}
 
+	/**
+	 * @test
+	 */
 	public function testStack()
 	{
-		$source = new FakeSource;
+		$source = new FakeSource();
 		$stack = LayerCache::forSource([$source, 'get'])->toStack('X');
 		$this->assertSame($stack, LayerCache::stack('X'));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testForSourceCallback()
 	{
-		$source = $this->getMock('FakeSource', ['getById', 'mapKey']);
-		$source->expects($this->once())->method('getById')->with(123)->will($this->returnValue('DATA'));
+		$source = $this->createMock(FakeSource::class);
+		$source->expects($this->once())
+		  ->method('getById')
+		  ->with(123)
+		  ->willReturn('DATA')
+		;
 		$source->expects($this->never())->method('mapKey');
 
-		$stack = LayerCache::forSource([$source, 'getById'], [$source, 'mapKey'])->toStack('X');
+		$stack = LayerCache::forSource(
+		    [$source, 'getById'],
+		    [$source, 'mapKey']
+		)->toStack('X');
+
 		$this->assertSame('DATA', $stack->get(123));
 	}
 
+	/**
+	 * @test
+	 */
 	public function testHasStack()
 	{
-		LayerCache::forSource([new FakeSource, 'get'])->toStack('X');
+		LayerCache::forSource([new FakeSource(), 'get'])->toStack('X');
+
 		$this->assertTrue(LayerCache::hasStack('X'));
 		$this->assertFalse(LayerCache::hasStack('Y'));
 	}
 
 	/**
-	 * @expectedException \RuntimeException
+	 * @test
 	 */
 	public function testRegisterCacheSameNameThrowsUp()
 	{
 		LayerCache::registerCache('mc', new FakeCache());
+
+	    $this->expectException(\RuntimeException::class);
+
 		LayerCache::registerCache('mc', new FakeCache());
 	}
 }
