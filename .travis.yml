@@ -1,3 +1,6 @@
+dist: trusty
+sudo: false
+
 language: php
 
 php:
@@ -9,7 +12,7 @@ install:
     - 'composer install --prefer-dist --no-suggest'
 
 script:
-    - 'cd test && ../vendor/bin/phpunit -c phpunit.xml'
+    - 'cd test && ../vendor/bin/phpunit -c phpunit.xml --debug'
 
 cache:
   directories:
