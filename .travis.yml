@@ -12,8 +12,11 @@ install:
     - 'composer install --prefer-dist --no-suggest'
 
 before_script:
-    - 'echo "extension = apcu.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini'
-    - 'echo "extension = memcache.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini'
+    - |
+        # APCu is only available for PHP 7.x
+        if [[ $TRAVIS_PHP_VERSION = 7.* ]]; then
+            echo "extension = apcu.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        fi
 
 script:
     - 'cd test && ../vendor/bin/phpunit -c phpunit.xml --debug'
