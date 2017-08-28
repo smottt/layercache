@@ -21,12 +21,10 @@
 
 namespace LayerCache\Cache;
 
-use LayerCache\Cache\CachingLayer;
-
 /**
  * @package LayerCache
  *
- * @author metod
+ * @author Metod N <simpel.si>
  */
 class Aerospike implements CachingLayer
 {

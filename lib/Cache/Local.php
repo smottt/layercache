@@ -21,15 +21,13 @@
 
 namespace LayerCache\Cache;
 
-use LayerCache\Cache\CachingLayer;
-
 /**
  * A php array LRU cache
  *
  * @package LayerCache
  *
  * @author Gasper Kozak
- * @author Metod N <metod@simpel.si
+ * @author Metod N <metod@simpel.si>
  */
 class Local implements CachingLayer
 {

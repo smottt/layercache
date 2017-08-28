@@ -21,13 +21,11 @@
 
 namespace LayerCache\Cache;
 
-use LayerCache\Cache\CachingLayer;
-
 /**
  * @package LayerCache
  *
  * @author Gasper Kozak
- * @author Metod N <metod@simpel.si.
+ * @author Metod N <metod@simpel.si>
  */
 class File implements CachingLayer
 {

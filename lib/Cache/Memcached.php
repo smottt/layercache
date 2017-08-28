@@ -21,8 +21,6 @@
 
 namespace LayerCache\Cache;
 
-use LayerCache\Cache\CachingLayer;
-
 /**
  * @package LayerCache
  *

@@ -25,7 +25,7 @@ namespace LayerCache\Cache;
  * @package LayerCache
  *
  * @author Gasper Kozak
- * @author Metod N <metod@simpel.si
+ * @author Metod N <metod@simpel.si>
  */
 interface CachingLayer
 {
