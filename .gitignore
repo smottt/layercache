@@ -1,6 +1,3 @@
-.buildpath
-.project
-.settings
-/vendor
-/bin/phpunit
+/composer.lock
 /test/tmp
+/vendor

@@ -1,5 +1,9 @@
 <?php
 
+namespace LayerCache\Tests\Cache;
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * Copyright 2009-2016 Gasper Kozak
  *
@@ -20,8 +24,7 @@
  *
  * @package Tests
  */
-
-class AerospikeTest extends \PHPUnit_Framework_TestCase
+class AerospikeTest extends TestCase
 {
 	protected $aerospike;
 
@@ -30,7 +33,7 @@ class AerospikeTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function setUp_Aerospike()
 	{
-		$this->aerospike = $this->getMock('\Aerospike');
+		$this->aerospike = $this->createMock(\Aerospike::class);
 	}
 
 	/**

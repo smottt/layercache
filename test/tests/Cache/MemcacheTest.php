@@ -1,5 +1,9 @@
 <?php
 
+namespace LayerCache\Tests\Cache;
+
+use PHPUnit\Framework\TestCase;
+
 /**
  * Copyright 2009-2016 Gasper Kozak
  *
@@ -20,13 +24,12 @@
  *
  * @package Tests
  */
-
-class MemcacheTest extends \PHPUnit_Framework_TestCase
+class MemcacheTest extends TestCase
 {
 	/**
 	 * @before
 	 */
-	protected function checkExtensionAvailability()
+	public function checkExtensionAvailability()
 	{
 		if (!extension_loaded('memcache')) {
 			$this->markTestSkipped('Memcache extension not available.');
@@ -38,7 +41,7 @@ class MemcacheTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testGetEmpty()
 	{
-		$mc = $this->getMock('Memcache', ['get']);
+		$mc = $this->createMock(\Memcache::class);
 		$mc->expects($this->once())->method('get')->with('test')->willReturn(false);
 		$cache = new \LayerCache\Cache\Memcache($mc);
 		$this->assertNull($cache->get('test'));
@@ -49,7 +52,7 @@ class MemcacheTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testSetAndGet()
 	{
-		$mc = $this->getMock('Memcache', ['get', 'set']);
+		$mc = $this->createMock(\Memcache::class);
 
 		$mc->expects($this->at(0))->method('get')->with('test')->willReturn(false);
 		$mc->expects($this->at(1))->method('set')->with('test', 'DATA', false, 10);
@@ -66,7 +69,7 @@ class MemcacheTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testSetAndGetComplexStructure()
 	{
-		$mc = $this->getMock('Memcache', ['get', 'set']);
+		$mc = $this->createMock(\Memcache::class);
 
 		$o = new \stdClass();
 		$o->z = 34;
@@ -89,7 +92,7 @@ class MemcacheTest extends \PHPUnit_Framework_TestCase
 	{
 		$data = 'SOME DATA';
 
-		$mc = $this->getMock('Memcache', ['get', 'set', 'delete']);
+		$mc = $this->createMock(\Memcache::class);
 		$mc->expects($this->at(0))->method('get')->with('test')->willReturn(false);
 		$mc->expects($this->at(1))->method('set')->with('test', $data, 7, 10);
 		$mc->expects($this->at(2))->method('get')->with('test')->willReturn($data);
