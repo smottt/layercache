@@ -4,6 +4,13 @@ All notable changes to LayerCache will be documented in this file using the [Kee
 
 ## [Unreleased]
 
+## [1.1.0] - 2017-08-28
+
+### Added
+
+* PHP 7.x support.
+* Added `APCu` support.
+
 ## [1.0.0] - 2015-12-31
 
 ### Added
