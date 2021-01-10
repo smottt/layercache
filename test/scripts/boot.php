@@ -15,5 +15,3 @@ if (!defined('LAYERCACHE_TEST_TMP_DIR')) {
 if (!is_dir(LAYERCACHE_TEST_TMP_DIR)) {
 	mkdir(LAYERCACHE_TEST_TMP_DIR, 0777);
 }
-
-error_reporting(E_ALL & ~E_DEPRECATED);
