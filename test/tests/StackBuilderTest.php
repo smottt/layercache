@@ -8,6 +8,7 @@ use LayerCache\LayerCache;
 use LayerCache\ObjectMap;
 use LayerCache\Test\FakeCache;
 use LayerCache\Test\FakeSource;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use LayerCache\Stack;
 use LayerCache\StackBuilder;
@@ -198,9 +199,9 @@ class StackBuilderTest extends TestCase
 			->with('fake', $stack)
 		;
 
-		/** @var \PHPUnit_Framework_MockObject_MockObject|StackBuilder $pb */
+		/** @var MockObject|StackBuilder $pb */
 		$pb = $this->getMockBuilder(StackBuilder::class)
-            ->setMethods(['createLayer', 'createStack'])
+            ->onlyMethods(['createLayer', 'createStack'])
             ->setConstructorArgs([
                 $stackMap,
                 new ObjectMap(),
@@ -210,23 +211,20 @@ class StackBuilderTest extends TestCase
             ->getMock()
         ;
 
-		$pb->expects($this->at(0))
-			->method('createLayer')
-			->with($cache1)
-            ->willReturn($layer1)
-		;
+		$pb->expects($this->exactly(2))
+            ->method('createLayer')
+            ->withConsecutive(
+                [$cache1],
+                [$cache2]
+            )
+            ->willReturnOnConsecutiveCalls($layer1, $layer2)
+        ;
 
-		$pb->expects($this->at(1))
-			->method('createLayer')
-			->with($cache2)
-            ->willReturn($layer2)
-		;
-
-		$pb->expects($this->at(2))
-			->method('createStack')
-			->with([$source, 'get'], [$source, 'normalizeKey'], [$layer1, $layer2])
+		$pb->expects($this->once())
+            ->method('createStack')
+            ->with([$source, 'get'], [$source, 'normalizeKey'], [$layer1, $layer2])
             ->willReturn($stack)
-		;
+        ;
 
 		$p = $pb
 			->addLayer($cache1)->withPrefetch(20, 0.1)

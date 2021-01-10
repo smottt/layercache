@@ -3,6 +3,7 @@
 use LayerCache\Cache\CachingLayer;
 use LayerCache\Test\FakeSource;
 use LayerCache\Trace;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -28,13 +29,13 @@ use PHPUnit\Framework\TestCase;
 
 class StackTest extends TestCase
 {
-    /** @var \PHPUnit_Framework_MockObject_MockObject|FakeSource */
+    /** @var MockObject|FakeSource */
     protected $source;
 
-    /** @var \PHPUnit_Framework_MockObject_MockObject|CachingLayer */
+    /** @var MockObject|CachingLayer */
     protected $cache1;
 
-    /** @var \PHPUnit_Framework_MockObject_MockObject|CachingLayer */
+    /** @var MockObject|CachingLayer */
     protected $cache2;
 
     /**
@@ -305,22 +306,22 @@ class StackTest extends TestCase
 		$this->assertInstanceOf(Trace::class, $t);
 
 		/** @var Trace $t */
-		$this->assertInternalType('int', $t->time);
+        $this->assertIsInt($t->time);
 		$this->assertSame(5, $t->key);
 		$this->assertSame('key:5', $t->flat_key);
 		$this->assertSame(1, $t->cache_count);
-		$this->assertInternalType('int', $t->rand);
+		$this->assertIsInt($t->rand);
 		$this->assertEquals(1, count($t->reads));
 		$this->assertSame(['key' => 5, 'data' => 'DATA'], $t->source);
 		$this->assertEquals(1, count($t->writes));
 
 		$stack->trace($t)->get(5);
 		$this->assertInstanceOf(Trace::class, $t);
-		$this->assertInternalType('int', $t->time);
+		$this->assertIsInt($t->time);
 		$this->assertSame(5, $t->key);
 		$this->assertSame('key:5', $t->flat_key);
 		$this->assertSame(1, $t->cache_count);
-		$this->assertInternalType('int', $t->rand);
+		$this->assertIsInt($t->rand);
 		$this->assertEquals(1, count($t->reads));
 		$this->assertSame([], $t->source);
 		$this->assertEquals(0, count($t->writes));
@@ -331,10 +332,21 @@ class StackTest extends TestCase
 	 */
 	public function testTraceWorksOnlyOnce()
 	{
-		$this->source->expects($this->at(0))->method('normalizeKey')->with(5)->will($this->returnValue('key:5'));
-		$this->source->expects($this->at(1))->method('get')->with(5)->will($this->returnValue('DATA=5'));
-		$this->source->expects($this->at(2))->method('normalizeKey')->with(7)->will($this->returnValue('key:7'));
-		$this->source->expects($this->at(3))->method('get')->with(7)->will($this->returnValue('DATA=7'));
+	    $this->source->expects($this->exactly(2))
+            ->method('normalizeKey')
+            ->willReturnMap([
+                [5, 'key:5'],
+                [7, 'key:7'],
+            ])
+        ;
+
+	    $this->source->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [5, 'DATA=5'],
+                [7, 'DATA=7']
+            ])
+        ;
 
 		$this->cache1 = new \LayerCache\Cache\Local();
 
@@ -349,11 +361,11 @@ class StackTest extends TestCase
 		$this->assertInstanceOf(Trace::class, $t);
 
         /** @var Trace $t */
-		$this->assertInternalType('int', $t->time);
+		$this->assertIsInt($t->time);
 		$this->assertSame(5, $t->key);
 		$this->assertSame('key:5', $t->flat_key);
 		$this->assertSame(1, $t->cache_count);
-		$this->assertInternalType('int', $t->rand);
+		$this->assertIsInt($t->rand);
 		$this->assertEquals(1, count($t->reads));
 		$this->assertSame(['key' => 5, 'data' => 'DATA=5'], $t->source);
 		$this->assertEquals(1, count($t->writes));
@@ -361,11 +373,11 @@ class StackTest extends TestCase
 		// without trace ($t keeps previous trace info)
 		$stack->get(7);
 		$this->assertInstanceOf(Trace::class, $t);
-		$this->assertInternalType('int', $t->time);
+		$this->assertIsInt($t->time);
 		$this->assertSame(5, $t->key);
 		$this->assertSame('key:5', $t->flat_key);
 		$this->assertSame(1, $t->cache_count);
-		$this->assertInternalType('int', $t->rand);
+		$this->assertIsInt($t->rand);
 		$this->assertEquals(1, count($t->reads));
 		$this->assertSame(['key' => 5, 'data' => 'DATA=5'], $t->source);
 		$this->assertEquals(1, count($t->writes));
