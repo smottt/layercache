@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2009-2017 Gasper Kozak
+ * Copyright 2009-2021 Gasper Kozak
  *
  * This file is part of LayerCache.
  *
