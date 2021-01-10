@@ -1,26 +1,20 @@
-dist: trusty
+dist: focal
 sudo: required
 
 language: php
 
 php:
-    - '5.6'
-    - '7.0'
-    - '7.1'
-    - '7.2'
-    - '7.3'
     - '7.4'
+    - '8.0'
 
 install:
     - 'composer install --prefer-dist --no-suggest'
 
 before_script:
     - |
-        # Enable APCu for PHP 7.x
-        if [[ $TRAVIS_PHP_VERSION = 7.* ]]; then
-            yes '' | pecl install -f apcu
-            echo "apc.enable_cli = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-        fi
+        # Enable APCu
+        yes '' | pecl install -f apcu
+        echo "apc.enable_cli = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
 script:
     - 'cd test && ../vendor/bin/phpunit -c phpunit.xml --debug'
