@@ -4,6 +4,12 @@ All notable changes to LayerCache will be documented in this file using the [Kee
 
 ## [Unreleased]
 
+## [1.1.1] - 2021-01-10
+
+### Added
+
+* Run tests up to PHP 7.4 in Travis CI
+
 ## [1.1.0] - 2017-08-28
 
 ### Added

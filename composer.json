@@ -1,7 +1,7 @@
 {
 	"name": "smottt/layercache",
 	"description": "LayerCache, a PHP multi-layer caching framework",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"type": "library",
 	"keywords": ["cache"],
 	"homepage": "https://github.com/smottt/layercache",
