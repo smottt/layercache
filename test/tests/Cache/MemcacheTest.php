@@ -2,6 +2,7 @@
 
 namespace LayerCache\Tests\Cache;
 
+use LayerCache\Cache\Memcache;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -41,9 +42,9 @@ class MemcacheTest extends TestCase
 	 */
 	public function testGetEmpty()
 	{
-		$mc = $this->createMock(\Memcache::class);
-		$mc->expects($this->once())->method('get')->with('test')->willReturn(false);
-		$cache = new \LayerCache\Cache\Memcache($mc);
+		$cache = $this->createMemcache();
+		$cache->del('test');
+
 		$this->assertNull($cache->get('test'));
 	}
 
@@ -52,13 +53,8 @@ class MemcacheTest extends TestCase
 	 */
 	public function testSetAndGet()
 	{
-		$mc = $this->createMock(\Memcache::class);
-
-		$mc->expects($this->at(0))->method('get')->with('test')->willReturn(false);
-		$mc->expects($this->at(1))->method('set')->with('test', 'DATA', false, 10);
-		$mc->expects($this->at(2))->method('get')->with('test')->willReturn('DATA');
-
-		$cache = new \LayerCache\Cache\Memcache($mc);
+		$cache = $this->createMemcache();
+		$cache->del('test');
 		$this->assertNull($cache->get('test'));
 		$cache->set('test', 'DATA', 10);
 		$this->assertSame('DATA', $cache->get('test'));
@@ -69,20 +65,15 @@ class MemcacheTest extends TestCase
 	 */
 	public function testSetAndGetComplexStructure()
 	{
-		$mc = $this->createMock(\Memcache::class);
-
 		$o = new \stdClass();
 		$o->z = 34;
 		$data = ['x', $o, ['a' => 12]];
 
-		$mc->expects($this->at(0))->method('get')->with('test')->willReturn(false);
-		$mc->expects($this->at(1))->method('set')->with('test', $data, 7, 10);
-		$mc->expects($this->at(2))->method('get')->with('test')->willReturn(serialize($data));
-
-		$cache = new \LayerCache\Cache\Memcache($mc, 7);
+		$cache = $this->createMemcache();
+		$cache->del('test');
 		$this->assertNull($cache->get('test'));
 		$cache->set('test', $data, 10);
-		$this->assertEquals($data, unserialize($cache->get('test')));
+		$this->assertEquals($data, $cache->get('test'));
 	}
 
 	/**
@@ -92,14 +83,8 @@ class MemcacheTest extends TestCase
 	{
 		$data = 'SOME DATA';
 
-		$mc = $this->createMock(\Memcache::class);
-		$mc->expects($this->at(0))->method('get')->with('test')->willReturn(false);
-		$mc->expects($this->at(1))->method('set')->with('test', $data, 7, 10);
-		$mc->expects($this->at(2))->method('get')->with('test')->willReturn($data);
-		$mc->expects($this->at(3))->method('delete')->with('test')->willReturn(true);
-		$mc->expects($this->at(4))->method('get')->with('test')->willReturn(false);
-
-		$cache = new \LayerCache\Cache\Memcache($mc, 7);
+		$cache = $this->createMemcache();
+		$cache->del('test');
 
 		$this->assertNull($cache->get('test'));
 
@@ -109,4 +94,15 @@ class MemcacheTest extends TestCase
 		$this->assertTrue($cache->del('test'));
 		$this->assertNull($cache->get('test'));
 	}
+
+    /**
+     * @return Memcache
+     */
+	protected function createMemcache()
+    {
+        $mc = new \Memcache();
+        $mc->addServer('memcached');
+
+        return new Memcache($mc);
+    }
 }
